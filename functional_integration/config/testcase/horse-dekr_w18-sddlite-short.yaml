@@ -1,0 +1,9 @@
+defaults:
+  - dataset: horse
+  - net_type: dekr_w18
+  - detector: sddlite
+  - training: short
+  - _self_
+
+name: horse-dekr_w18-sddlite-short
+ref_output: ${root_dir}/ref_output/${testcase.name}.pckl

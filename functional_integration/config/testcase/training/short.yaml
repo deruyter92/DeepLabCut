@@ -1,0 +1,7 @@
+# Training hyperparameters configuration
+
+# Short: minimal training loop with a only a few epochs for quick testing
+seed: 42
+batch_size: 8
+epochs: 5
+detector_epochs: 5

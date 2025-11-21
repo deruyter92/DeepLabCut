@@ -1,0 +1,3 @@
+name: trimice
+data_path: ${root_dir}/data/trimice/
+eval_video: ${root_dir}/data/trimice/videos/trimouse.mp4

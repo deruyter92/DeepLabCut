@@ -1,0 +1,9 @@
+defaults: 
+  - dataset: fly
+  - net_type: resnet_50
+  - detector: sddlite
+  - training: short
+  - _self_
+
+name: fly-resnet_50-sddlite-short
+ref_output: ${root_dir}/ref_output/${testcase.name}.pckl

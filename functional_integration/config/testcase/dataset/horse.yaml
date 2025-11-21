@@ -1,0 +1,3 @@
+name: horse
+data_path: ${root_dir}/data/horse/
+eval_video: ${root_dir}/data/horse/videos/horse.mp4

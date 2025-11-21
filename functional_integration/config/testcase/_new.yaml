@@ -1,0 +1,32 @@
+# Dataset, net_type, detector and training configurations can be selected from
+# one of the existing configs in subdirectories 
+# (e.g. net_type: resnet_50  points to -> ./net_type/resnet_50.yaml)
+defaults: 
+  - dataset:
+  - net_type:
+  - detector:
+  - training:
+  - _self_
+
+# Test case needs at least a name and a path to reference output. The preferred 
+# naming pattern for testcases is: {dataset}-{net_type}-{detector}-{training}.
+# Preferably the ref_output file also has the same name as the testcase. 
+name: name-of-testcase
+ref_output: ${root_dir}/ref_output/${testcase.name}.pckl
+
+
+# dataset, net_type, detector and training configs can be overriden by 
+# directly including them here, e.g.:
+# dataset:
+#   name: fly
+#   data_path: functional_testing/data/fly/
+#   eval_video: functional_testing/data/fly/videos/fly.mp4
+# net_type: 
+#   name: resnet_50
+# detector: 
+#   name: sddlite
+# training:
+#   seed: 42
+#   batch_size: 8
+#   epochs: 5
+#   detector_epochs: 5
