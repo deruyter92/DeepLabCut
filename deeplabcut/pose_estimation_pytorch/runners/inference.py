@@ -223,7 +223,11 @@ class InferenceRunner(Runner, Generic[ModelType], metaclass=ABCMeta):
                 weights_only=load_weights_only,
             )
 
-        self.model.to(self.device)
+        self._target_device = torch.device(self.device)
+        self._device_type = self._target_device.type
+        self._use_cuda_transfers = self._device_type == "cuda" and torch.cuda.is_available()
+
+        self.model.to(self._target_device)
         self.model.eval()
 
         if self.inference_cfg.compile.enabled:
@@ -299,6 +303,37 @@ class InferenceRunner(Runner, Generic[ModelType], metaclass=ABCMeta):
             return self._async_inference(images, shelf_writer)
         else:
             return self._sequential_inference(images, shelf_writer)
+    
+    def _pin_tensor_if_needed(self, tensor: torch.Tensor | None) -> torch.Tensor | None:
+        if (
+            tensor is None
+            or not isinstance(tensor, torch.Tensor)
+            or tensor.device.type != "cpu"
+            or not self._use_cuda_transfers
+        ):
+            return tensor
+        if hasattr(tensor, "is_pinned") and tensor.is_pinned():
+            return tensor
+        try:
+            return tensor.pin_memory()
+        except RuntimeError:
+            return tensor
+
+    def _pin_model_kwargs(self, kwargs: dict[str, np.ndarray | torch.Tensor]) -> dict:
+        if not self._use_cuda_transfers:
+            return kwargs
+        pinned = {}
+        for key, value in kwargs.items():
+            if isinstance(value, torch.Tensor):
+                pinned[key] = self._pin_tensor_if_needed(value)
+            else:
+                pinned[key] = value
+        return pinned
+
+    def _to_target_device(self, tensor: torch.Tensor) -> torch.Tensor:
+        if not isinstance(tensor, torch.Tensor):
+            return tensor
+        return tensor.to(self._target_device, non_blocking=self._use_cuda_transfers)
 
     def _sequential_inference(
         self,
@@ -474,9 +509,11 @@ class InferenceRunner(Runner, Generic[ModelType], metaclass=ABCMeta):
         called, otherwise this method will raise an error.
         """
         batch = torch.stack(self._batch_list[: self.batch_size], dim=0)
+        batch = self._pin_tensor_if_needed(batch)
         model_kwargs = {
             mk: v[: self.batch_size] for mk, v in self._model_kwargs.items()
         }
+        model_kwargs = self._pin_model_kwargs(model_kwargs)
 
         self._predictions += self.predict(batch, **model_kwargs)
 
@@ -534,9 +571,11 @@ class InferenceRunner(Runner, Generic[ModelType], metaclass=ABCMeta):
                 # Process full batches and put them in the queue
                 while len(self._batch_list) >= self.batch_size:
                     batch = torch.stack(self._batch_list[: self.batch_size], dim=0)
+                    batch = self._pin_tensor_if_needed(batch)
                     model_kwargs = {
                         mk: v[: self.batch_size] for mk, v in self._model_kwargs.items()
                     }
+                    model_kwargs = self._pin_model_kwargs(model_kwargs)
 
                     self._safe_put((batch, model_kwargs))
 
@@ -553,7 +592,9 @@ class InferenceRunner(Runner, Generic[ModelType], metaclass=ABCMeta):
             # Process any remaining inputs
             if len(self._batch_list) > 0:
                 batch = torch.stack(self._batch_list, dim=0)
-                self._safe_put((batch, self._model_kwargs))
+                batch = self._pin_tensor_if_needed(batch)
+                model_kwargs = self._pin_model_kwargs(self._model_kwargs)
+                self._safe_put((batch, model_kwargs))
 
         except BaseException as e:  # catches KeyboardInterrupt, SystemExit, etc.
             self._exception = e
@@ -611,12 +652,13 @@ class PoseInferenceRunner(InferenceRunner[PoseModel]):
         if self.dynamic is not None:
             # dynamic cropping can use patches
             inputs = self.dynamic.crop(inputs)
+
         if self.inference_cfg.autocast.enabled:
-            with torch.autocast(device_type=str(self.device)):
-                outputs = self.model(inputs.to(self.device), **kwargs)
-                raw_predictions = self.model.get_predictions(outputs)
+            with torch.autocast(device_type=self._device_type):
+                outputs = self.model(self._to_target_device(inputs), **kwargs)
+            raw_predictions = self.model.get_predictions(outputs)
         else:
-            outputs = self.model(inputs.to(self.device), **kwargs)
+            outputs = self.model(self._to_target_device(inputs), **kwargs)
             raw_predictions = self.model.get_predictions(outputs)
 
         if self.dynamic is not None:
@@ -748,11 +790,11 @@ class CTDInferenceRunner(PoseInferenceRunner):
 
         # Normal prediction path
         if self.inference_cfg.autocast.enabled:
-            with torch.autocast(device_type=str(self.device)):
-                outputs = self.model(inputs.to(self.device), **kwargs)
+            with torch.autocast(device_type=self._device_type):
+                outputs = self.model(self._to_target_device(inputs), **kwargs)
                 raw_predictions = self.model.get_predictions(outputs)
         else:
-            outputs = self.model(inputs.to(self.device), **kwargs)
+            outputs = self.model(self._to_target_device(inputs), **kwargs)
             raw_predictions = self.model.get_predictions(outputs)
 
         predictions = [
@@ -1014,10 +1056,10 @@ class DetectorInferenceRunner(InferenceRunner[BaseDetector]):
             ]
         """
         if self.inference_cfg.autocast.enabled:
-            with torch.autocast(device_type=str(self.device)):
-                _, raw_predictions = self.model(inputs.to(self.device))
+            with torch.autocast(device_type=self._device_type):
+                _, raw_predictions = self.model(self._to_target_device(inputs))
         else:
-            _, raw_predictions = self.model(inputs.to(self.device))
+            _, raw_predictions = self.model(self._to_target_device(inputs))
         predictions = [
             {
                 "detection": {
