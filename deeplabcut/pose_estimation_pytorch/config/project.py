@@ -13,9 +13,11 @@
 from pydantic.dataclasses import dataclass
 from dataclasses import field
 
+from deeplabcut.core.config import ConfigMixin
+
 
 @dataclass
-class ProjectConfig:
+class ProjectConfig(ConfigMixin):
     """Complete project configuration.
 
     Attributes:

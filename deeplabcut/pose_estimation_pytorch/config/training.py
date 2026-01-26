@@ -13,10 +13,11 @@
 from pydantic.dataclasses import dataclass
 from dataclasses import field
 from deeplabcut.core.weight_init import WeightInitialization
+from deeplabcut.core.config import ConfigMixin
 
 
 @dataclass
-class TrainSettingsConfig:
+class TrainSettingsConfig(ConfigMixin):
     """Training settings configuration.
 
     Attributes:

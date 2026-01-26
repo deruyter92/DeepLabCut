@@ -14,9 +14,11 @@ from pydantic.dataclasses import dataclass
 
 from typing import Any
 
+from deeplabcut.core.config import ConfigMixin
+
 
 @dataclass
-class OptimizerConfig:
+class OptimizerConfig(ConfigMixin):
     """Optimizer configuration.
 
     Attributes:
@@ -29,7 +31,7 @@ class OptimizerConfig:
 
 
 @dataclass
-class SchedulerConfig:
+class SchedulerConfig(ConfigMixin):
     """Learning rate scheduler configuration.
 
     Attributes:
@@ -42,7 +44,7 @@ class SchedulerConfig:
 
 
 @dataclass
-class SnapshotCheckpointConfig:
+class SnapshotCheckpointConfig(ConfigMixin):
     """Snapshot configuration for model checkpoints.
 
     Attributes:
@@ -57,7 +59,7 @@ class SnapshotCheckpointConfig:
 
 
 @dataclass
-class RunnerConfig:
+class RunnerConfig(ConfigMixin):
     """Training runner configuration.
 
     Attributes:
