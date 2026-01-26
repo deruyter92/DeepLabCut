@@ -9,17 +9,20 @@
 # Licensed under GNU Lesser General Public License v3.0
 #
 """Classes to configure how to initialize model weights"""
+
 from __future__ import annotations
 
 import warnings
-from dataclasses import dataclass
+from pydantic.dataclasses import dataclass
 from pathlib import Path
 
 import numpy as np
 
+from deeplabcut.core.types import PydanticNDArray
+from deeplabcut.core.config import ConfigMixin
 
 @dataclass
-class WeightInitialization:
+class WeightInitialization(ConfigMixin):
     """Configures weights initialization when transfer learning or fine-tuning models
 
     Args:
@@ -42,12 +45,12 @@ class WeightInitialization:
         bodyparts: Optionally, the name of each bodypart entry in the conversion array.
     """
 
-    snapshot_path: Path
+    snapshot_path: Path | None = None
     detector_snapshot_path: Path | None = None
     dataset: str | None = None
     with_decoder: bool = False
     memory_replay: bool = False
-    conversion_array: np.ndarray | None = None
+    conversion_array: PydanticNDArray | None = None
     bodyparts: list[str] | None = None
 
     def __post_init__(self):
