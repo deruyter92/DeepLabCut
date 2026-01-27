@@ -70,6 +70,35 @@ class ConfigMixin:
         return cls(**cfg_dict)
 
     @classmethod
+    def from_any(
+        cls,
+        config: Self | dict | DictConfig | str | Path,
+    ) -> Self:
+        """
+        Create a new instance from various configuration formats.
+        
+        Args:
+            config: Configuration as a ConfigMixin instance, dictionary, or DictConfig.
+                   If already a ConfigMixin instance, returns it as-is.
+        
+        Returns:
+            A new instance of the ConfigMixin subclass.
+        """
+        if isinstance(config, ConfigMixin):
+            return config
+        elif isinstance(config, str | Path):
+            return cls.from_yaml(config)
+        elif isinstance(config, DictConfig):
+            return cls.from_dict(OmegaConf.to_container(config, resolve=True))
+        elif isinstance(config, dict):
+            return cls.from_dict(config)
+        else:
+            raise TypeError(
+                "Failure to load configuration: Expected pydantic dataclass, "
+                f"dictionary, DictConfig, string, or Path. Got {type(config)}"
+            )
+    
+    @classmethod
     def from_yaml(cls, yaml_path: str | Path) -> Self:
         return cls.from_dict(read_config_as_dict(yaml_path))
 
