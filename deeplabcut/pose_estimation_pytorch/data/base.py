@@ -12,19 +12,20 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from pathlib import Path
+import warnings
 
 import albumentations as A
 import numpy as np
+from omegaconf import DictConfig, OmegaConf
 
+from deeplabcut.pose_estimation_pytorch.config.pose import PoseConfig
 import deeplabcut.core.config as config_utils
 import deeplabcut.pose_estimation_pytorch.config as config
 from deeplabcut.pose_estimation_pytorch.data.dataset import (
     PoseDataset,
     PoseDatasetParameters,
 )
-from deeplabcut.pose_estimation_pytorch.data.generative_sampling import (
-    GenSamplingConfig,
-)
+from deeplabcut.pose_estimation_pytorch.config.data import GenSamplingConfig
 from deeplabcut.pose_estimation_pytorch.data.snapshots import list_snapshots, Snapshot
 from deeplabcut.pose_estimation_pytorch.data.utils import (
     _compute_crop_bounds,
@@ -54,12 +55,49 @@ class Loader(ABC):
         self,
         project_root: str | Path,
         image_root: str | Path,
-        model_config_path: str | Path,
+        model_config: PoseConfig | DictConfig | Path | str | None = None,
+        model_config_path: Path | str | None = None,
     ) -> None:
+        """
+        Initialize the Loader.
+
+        Args:
+            project_root: The root directory of the project.
+            image_root: The root directory of the images.
+            model_config (Path | str | PoseConfig | DictConfig): 
+                The pose model configuration. Can be a path to a YAML file, a PoseConfig object, or a dictionary.
+            (model_config_path: The path to the pose model configuration. Deprecated, use `model_config` instead.)
+        """
+        # Support for legacy argument `model_config_path`
+        if model_config_path is not None:
+            warnings.warn(
+                "argument `model_config_path` in Loader.__init__ is deprecated, use `model_config` instead",
+                DeprecationWarning,
+            )
+            if pose_config is not None: 
+                raise ValueError(
+                    "`model_config_path` and `model_config` arguments cannot be provided together! "
+                    "Please provide only `model_config`."
+                )
+            if Path(model_config_path).is_dir():
+                model_config_path = Path(model_config_path) / "pytorch_config.yaml"
+            pose_config = model_config_path
+        elif pose_config is None:
+            raise ValueError(
+                "`model_config` (or legacy argument `model_config_path`) must be provided."
+            )
+
+        # Resolve pose model configuration and configuration path.
+        provided_path = Path(model_config) if isinstance(model_config, (Path, str)) else None
+        self.model_cfg: DictConfig = PoseConfig.from_any(model_config)
+        self.model_config_path = provided_path or OmegaConf.select(self.model_cfg, "metadata.pose_config_path")
+        if self.model_config_path is None:
+            raise ValueError(
+                "`model_config` must contain a `metadata.pose_config_path` field."
+            )
+
         self.project_root = Path(project_root)
         self.image_root = Path(image_root)
-        self.model_config_path = Path(model_config_path)
-        self.model_cfg = config_utils.read_config_as_dict(str(model_config_path))
         self.pose_task = Task(self.model_cfg["method"])
         self._loaded_data: dict[str, dict[str, list[dict]]] = {}
 
