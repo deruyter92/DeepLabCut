@@ -11,6 +11,7 @@
 """Project configuration classes for DeepLabCut pose estimation models."""
 
 from pydantic.dataclasses import dataclass
+from pydantic import field_validator
 from dataclasses import field
 
 from deeplabcut.core.config import ConfigMixin
@@ -31,8 +32,8 @@ class ProjectConfig(ConfigMixin):
         colormap: Colormap for visualization
         dotsize: Dot size for visualization
         alphavalue: Alpha value for visualization
-    """
-
+    """  
+    multianimalproject: bool = False
     project_path: str = ""
     pose_config_path: str = ""
     bodyparts: list[str] = field(default_factory=list)
@@ -42,3 +43,11 @@ class ProjectConfig(ConfigMixin):
     colormap: str = "rainbow"
     dotsize: int = 12
     alphavalue: float = 0.7
+
+    @field_validator("multianimalproject", mode="before")
+    @classmethod
+    def normalize_multianimalproject(cls, v):
+        """Normalize empty/None values from legacy YAML files to False."""
+        if v is None or v == "":
+            return False
+        return bool(v)
