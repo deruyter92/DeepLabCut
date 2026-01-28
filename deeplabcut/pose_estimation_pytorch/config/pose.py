@@ -15,6 +15,10 @@ from dataclasses import field
 from pydantic import Field
 from enum import Enum
 
+from deeplabcut.pose_estimation_pytorch.config.versioning import (
+    migrate_config,
+    CURRENT_CONFIG_VERSION,
+)
 from deeplabcut.pose_estimation_pytorch.config.project import ProjectConfig
 from deeplabcut.pose_estimation_pytorch.config.data import DataConfig
 from deeplabcut.pose_estimation_pytorch.config.training import TrainSettingsConfig
@@ -119,8 +123,7 @@ class PoseConfig(ConfigMixin):
         logger: Logger configuration (e.g., WandB or CSV logger)
         with_center_keypoints: Whether to include center keypoints (for DEKR models)
     """
-
-    version: str = "1.0"
+    config_version: int = CURRENT_CONFIG_VERSION
     model: ModelConfig = field(default_factory=ModelConfig)
     net_type: NetType = NetType.RESNET_50
     method: MethodType = MethodType.BOTTOM_UP
