@@ -11,7 +11,7 @@
 """Project configuration classes for DeepLabCut pose estimation models."""
 
 import warnings
-from pydantic.dataclasses import dataclass
+from pydantic.dataclasses import dataclass, Field
 from pydantic import model_validator
 from dataclasses import field, fields
 
@@ -52,6 +52,7 @@ class ProjectConfig(ConfigMixin):
     colormap: str = "rainbow"
     dotsize: int = 12
     alphavalue: float = 0.7
+    training_fraction: list[float] = Field(default_factory=list, alias="TrainingFraction"	)
 
     @model_validator(mode="before")
     @classmethod
