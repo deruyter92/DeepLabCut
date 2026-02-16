@@ -331,6 +331,7 @@ def analyze_images(
                 condition_cfg=model_cfg["inference"]["conditions"],
                 config=config,
             )
+        # TODO @deruyter92: decide on typed / plain dict
         elif isinstance(ctd_conditions, dict):
             cond_provider = get_condition_provider(
                 condition_cfg=ctd_conditions,
@@ -467,6 +468,7 @@ def analyze_image_folder(
     Raises:
         ValueError: if the pose model is a top-down model but no detector path is given
     """
+    # TODO @deruyter92: decide on typed / plain dict
     if not isinstance(model_cfg, dict):
         model_cfg = config_utils.read_config_as_dict(model_cfg)
 

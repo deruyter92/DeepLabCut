@@ -354,6 +354,7 @@ class CondFromFile(CondProvider):
 
         # Parse list and return
         if images is None:
+            # TODO @deruyter92: decide on typed / plain list
             if not isinstance(conditions, list):
                 raise ValueError(
                     f"Conditions are expected to be of type list when `images=None`, "
@@ -368,6 +369,7 @@ class CondFromFile(CondProvider):
                     parsed.append(np.asarray(cond))
             return parsed
 
+        # TODO @deruyter92: decide on typed / plain dict
         if not isinstance(conditions, dict):
             raise ValueError(
                 f"Conditions are expected to be of type dict, got {type(conditions)}. "

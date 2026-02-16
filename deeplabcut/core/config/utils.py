@@ -14,6 +14,8 @@ from __future__ import annotations
 import warnings
 from pathlib import Path
 from typing import TYPE_CHECKING, Callable
+from pathlib import PurePath
+from enum import Enum
 
 if TYPE_CHECKING:
     from deeplabcut.core.config.project_config import ProjectConfig, ProjectConfig3D
@@ -21,10 +23,38 @@ if TYPE_CHECKING:
 import yaml
 import ruamel.yaml.representer
 from ruamel.yaml import YAML
-from omegaconf import DictConfig
 from pydantic import ValidationError
 
 from deeplabcut.core.engine import Engine
+
+
+def get_yaml_loader() -> YAML:
+    """Get a ruamel.yaml YAML handler with safe mode."""
+    yaml = YAML(typ="safe", pure=True)
+    return yaml
+
+
+def get_yaml_dumper() -> YAML:
+    """Get a ruamel.yaml YAML handler with representers for Enum and Path objects."""
+    yaml = YAML(typ="rt", pure=True)
+
+    # Use a very large width so long strings (e.g., file paths or keys with spaces)
+    # are kept on a single line instead of being wrapped, which can otherwise cause
+    # them to be emitted as complex keys. See also:
+    # https://stackoverflow.com/questions/31197268/pyyaml-yaml-dump-produces-complex-key-for-string-key-122-chars/31199123#31199123
+    # See PR https://github.com/DeepLabCut/DeepLabCut/pull/3140 for more details.
+    yaml.width = 1_000_000
+
+    # Auto-serialize Path objects as strings
+    yaml.representer.add_multi_representer(
+        PurePath,
+        lambda r, p: r.represent_str(str(p))
+    )
+    yaml.representer.add_multi_representer(
+        Enum,
+        lambda r, e: r.represent_str(e.value)
+    )
+    return yaml
 
 
 def read_config_as_dict(config_path: str | Path) -> dict:
@@ -145,10 +175,21 @@ scorername_3d: # Enter the scorer name for the 3D output
     return cfg_file_3d, ruamelFile_3d
 
 
-def read_config(configname: str | Path) -> DictConfig:
+def read_config(configname: str | Path, ignore_empty: bool = True) -> "ProjectConfig":
     """
     Reads structured config file defining a project.
-    Applies default values and repairs (engine, detector_snapshotindex, project_path) and writes back if needed.
+
+    Applies default values and repairs (engine, detector_snapshotindex, project_path)
+    and writes back if needed.
+
+    Args:
+        configname: Path to the project configuration file (config.yaml).
+        ignore_empty: If True, empty/None values in the YAML are ignored and
+            dataclass defaults are used instead. If False, empty values represent None.
+            Defaults to True.
+
+    Returns:
+        The project configuration as a ProjectConfig instance (supports dict-like access).
     """
     from deeplabcut.core.config.project_config import ProjectConfig
     path = Path(configname)
@@ -160,12 +201,12 @@ def read_config(configname: str | Path) -> DictConfig:
     if project_config.project_path != curr_dir:
         project_config.project_path = curr_dir
         project_config.to_yaml(configname)
-    return project_config.to_dictconfig()
+    return project_config
 
 
 def write_project_config(
     configname: str | Path,
-    cfg: dict | ProjectConfig | DictConfig,
+    cfg: "dict | ProjectConfig",
 ) -> None:
     """Write structured project config file (config.yaml) preserving template order."""
     from deeplabcut.core.config.project_config import ProjectConfig

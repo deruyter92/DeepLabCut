@@ -95,8 +95,10 @@ class TrainingRunner(Runner, Generic[ModelType], metaclass=ABCMeta):
         super().__init__(
             model=model, device=device, gpus=gpus, snapshot_path=snapshot_path
         )
+        # TODO @deruyter92: decide on typed / plain dict
         if isinstance(optimizer, dict):
             optimizer = build_optimizer(model, optimizer)
+        # TODO @deruyter92: decide on typed / plain dict
         if isinstance(scheduler, dict):
             scheduler = schedulers.build_scheduler(scheduler, optimizer)
 

@@ -556,6 +556,7 @@ def evaluate_snapshot(
 
     if pcutoff is None:
         pcutoff = cfg.get("pcutoff", 0.6)
+    # TODO @deruyter92: decide on typed / plain dict
     elif isinstance(pcutoff, dict):
         pcutoff = [
             pcutoff.get(bpt, 0.6)
@@ -575,6 +576,7 @@ def evaluate_snapshot(
         ),
         "pcutoff": (
             ", ".join([str(v) for v in pcutoff])
+            # TODO @deruyter92: decide on typed / plain list
             if isinstance(pcutoff, list)
             else pcutoff
         ),

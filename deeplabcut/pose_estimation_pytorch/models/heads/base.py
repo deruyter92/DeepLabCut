@@ -81,6 +81,7 @@ class BaseHead(ABC, nn.Module):
                 f"Could not parse ``weight_init`` parameter: {weight_init}."
             )
 
+        # TODO @deruyter92: decide on typed / plain dict
         if isinstance(criterion, dict):
             if aggregator is None:
                 raise ValueError(

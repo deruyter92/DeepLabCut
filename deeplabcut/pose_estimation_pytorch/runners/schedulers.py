@@ -81,6 +81,8 @@ def build_scheduler(
 
     parsed_params = {}
     for param_name, param in scheduler_cfg["params"].items():
+        # Ensure plain Python types for scheduler state_dict serialization
+
         if isinstance(param, list):
             param = [_parse_scheduler_param(p, optimizer) for p in param]
         else:
@@ -93,6 +95,7 @@ def build_scheduler(
 
 def _parse_scheduler_param(param: Any, optimizer: torch.optim.Optimizer) -> Any:
     """Parses parameters so they're built as schedulers if they're configured as one"""
+    if isinstance(param, dict) and "type" in param:
     if isinstance(param, dict) and "type" in param:
         param = build_scheduler(param, optimizer)
 
