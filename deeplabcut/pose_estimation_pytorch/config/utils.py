@@ -156,7 +156,7 @@ def update_config(config: dict, updates: dict, copy_original: bool = True) -> di
 
 # TODO @deruyter92 2026-02-17: This function is currently still used to update 
 # the config in a late stage (after the config is initially created and validated).
-# We should move away from this strategy and update all overide arguments during 
+# We should move away from this strategy and update all override arguments during 
 # config creation.   
 @ensure_plain_config
 def update_config_by_dotpath(
