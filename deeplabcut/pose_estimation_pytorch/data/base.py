@@ -299,12 +299,8 @@ class Loader(ABC):
         data["annotations"] = self.filter_annotations(data["annotations"], task)
         ctd_config = None
         if self.pose_task == Task.COND_TOP_DOWN:
-            # TODO @deruyter92: This pattern should be refactored throughout the codebase
-            # it is reading a config value that is supposed to be missing / None.
-            ctd_config = GenSamplingConfig(
-                bbox_margin=self.model_cfg["data"].get("bbox_margin", 20),
-                **(self.model_cfg["data"].get("gen_sampling") or {}),
-            )
+            # TODO @deruyter92: when moving to typed configs, this conversion becomes unnecessary
+            ctd_config = GenSamplingConfig.from_any(self.model_cfg.data.gen_sampling)
 
         dataset = PoseDataset(
             images=data["images"],
