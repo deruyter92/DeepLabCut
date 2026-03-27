@@ -19,8 +19,7 @@ from pydantic import ConfigDict
 from pydantic.dataclasses import dataclass
 from dataclasses import field
 
-from deeplabcut.core.config.change_tracking import ChangeTrackingMixin
-from deeplabcut.core.config.config_mixin import ConfigMixin
+from deeplabcut.core.config.mixins import ChangeTrackingMixin, ConfigMixin
 from deeplabcut.core.config.versioning import CURRENT_CONFIG_VERSION, MigrationMixin
 
 

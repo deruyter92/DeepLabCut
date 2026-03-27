@@ -14,7 +14,7 @@ from typing import Literal
 from pydantic.dataclasses import dataclass
 from enum import Enum
 
-from deeplabcut.core.config.config_mixin import ConfigMixin
+from deeplabcut.core.config.mixins import ConfigMixin
 
 
 class LoggerType(str, Enum):

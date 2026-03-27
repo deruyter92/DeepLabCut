@@ -14,7 +14,7 @@ from __future__ import annotations
 import copy
 from pathlib import Path
 
-from deeplabcut.core.config.config_mixin import ensure_plain_config
+from deeplabcut.core.config.utils import ensure_plain_config
 from deeplabcut.core.config import read_config_as_dict
 from deeplabcut.utils import auxiliaryfunctions
 

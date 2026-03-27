@@ -1,3 +1,9 @@
+from deeplabcut.core.config.mixins import (
+    ChangeTrackingMixin,
+    ConfigMixin,
+    MappingAccessMixin,
+)
+from deeplabcut.core.config.project_config import ProjectConfig
 from deeplabcut.core.config.utils import (
     read_config,
     read_config_as_dict,
@@ -10,6 +16,3 @@ from deeplabcut.core.config.utils import (
     write_config_3d_template,
     write_project_config,
 )
-from deeplabcut.core.config.change_tracking import ChangeTrackingMixin
-from deeplabcut.core.config.config_mixin import ConfigMixin
-from deeplabcut.core.config.project_config import ProjectConfig

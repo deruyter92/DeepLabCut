@@ -13,7 +13,7 @@
 from pydantic.dataclasses import dataclass
 from dataclasses import field
 from deeplabcut.core.weight_init import WeightInitialization
-from deeplabcut.core.config.config_mixin import ConfigMixin
+from deeplabcut.core.config.mixins import ConfigMixin
 
 
 @dataclass

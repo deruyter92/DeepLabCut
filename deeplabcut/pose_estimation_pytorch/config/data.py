@@ -17,7 +17,7 @@ from typing import Any
 from enum import Enum
 from typing import Literal
 
-from deeplabcut.core.config.config_mixin import ConfigMixin
+from deeplabcut.core.config.mixins import ConfigMixin
 
 
 class DataLoaderType(str, Enum):

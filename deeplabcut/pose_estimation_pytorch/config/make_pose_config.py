@@ -24,7 +24,7 @@ from deeplabcut.pose_estimation_pytorch.config.utils import (
     update_config,
 )
 from deeplabcut.core.config.project_config import ProjectConfig
-from deeplabcut.core.config.config_mixin import ensure_plain_config
+from deeplabcut.core.config.utils import ensure_plain_config
 from deeplabcut.pose_estimation_pytorch.config.inference import InferenceConfig
 from deeplabcut.pose_estimation_pytorch.config.training import TrainSettingsConfig
 from deeplabcut.pose_estimation_pytorch.config.runner import RunnerConfig

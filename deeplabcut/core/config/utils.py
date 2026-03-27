@@ -12,12 +12,14 @@
 from __future__ import annotations
 
 import warnings
+import logging
 from pathlib import Path
 from typing import TYPE_CHECKING, Callable
 from pathlib import PurePath
 from enum import Enum
+from functools import wraps
 
-from omegaconf import DictConfig
+from omegaconf import DictConfig, OmegaConf
 
 if TYPE_CHECKING:
     from deeplabcut.core.config.project_config import ProjectConfig, ProjectConfig3D
@@ -29,6 +31,8 @@ from omegaconf import DictConfig, ListConfig
 from pydantic import ValidationError
 
 from deeplabcut.core.engine import Engine
+
+logger = logging.getLogger(__name__)
 
 
 def get_yaml_loader() -> YAML:
@@ -131,6 +135,52 @@ def pretty_print(
             pretty_print(v, indent + 2, print_fn=print_fn)
         else:
             print_fn(f"{indent * ' '}{k}: {v}")
+
+
+def ensure_plain_config(fn: Callable) -> Callable:
+    """Convert typed config arguments into plain Python objects.
+
+    Any positional or keyword argument that is a ConfigMixin, OmegaConf
+    DictConfig, or OmegaConf ListConfig is converted to a plain ``dict`` / ``list``
+    before the decorated function is called.
+    """
+
+    def _to_plain(value, fn_name: str = "<unknown>", var_name: str = "<unknown>"):
+        # Lazy import to avoid circular imports during module initialization.
+        from deeplabcut.core.config.mixins import ConfigMixin
+
+        if isinstance(value, ConfigMixin):
+            logger.debug(
+                "converting %s (%s) to native dict in %s.",
+                var_name,
+                type(value).__name__,
+                fn_name,
+            )
+            return value.to_dict()
+        if isinstance(value, DictConfig):
+            logger.debug(
+                "converting %s (OmegaConf DictConfig) to plain dict in %s.",
+                var_name,
+                fn_name,
+            )
+            return OmegaConf.to_container(value, resolve=True)
+        if isinstance(value, ListConfig):
+            logger.debug(
+                "converting %s (OmegaConf ListConfig) to plain list in %s.",
+                var_name,
+                fn_name,
+            )
+            return OmegaConf.to_container(value, resolve=True)
+        return value
+
+    @wraps(fn)
+    def wrapper(*args, **kwargs):
+        fn_name = fn.__qualname__
+        args = tuple(_to_plain(a, fn_name) for a in args)
+        kwargs = {k: _to_plain(v, fn_name=fn_name, var_name=k) for k, v in kwargs.items()}
+        return fn(*args, **kwargs)
+
+    return wrapper
 
 # -----------------------------------------------------------------------------
 # Project config (config.yaml with template and defaults)
