@@ -13,12 +13,10 @@
 import logging
 
 import pytest
-from pydantic import BaseModel, ConfigDict, ValidationError
+from pydantic import ValidationError
 
-from deeplabcut.core.config import versioning
-from deeplabcut.core.config.mixins import ConfigMixin
+from deeplabcut.core.config import DLCVersionedConfig, versioning
 from deeplabcut.core.config.versioning import (
-    MigrationMixin,
     get_config_version,
     migrate_config,
     register_migration,
@@ -181,8 +179,7 @@ def test_roundtrip_v98_without_toy_field_unchanged():
 
 @pytest.fixture
 def ToyConfigWithValidField():
-    class ToyConfig(MigrationMixin, ConfigMixin, BaseModel):
-        model_config = ConfigDict(extra="forbid")
+    class ToyConfig(DLCVersionedConfig):
         config_version: int = _TOY_VERSION_NEW
         valid_project_config_field: str = ""
 
@@ -758,8 +755,7 @@ class TestMigrationLogging:
 # -----------------------------------------------------------------------------
 
 
-class ValidatedMigratingConfig(MigrationMixin, ConfigMixin, BaseModel):
-    model_config = ConfigDict(validate_assignment=True)
+class ValidatedMigratingConfig(DLCVersionedConfig):
     name: str = "default"
     count: int = 0
 

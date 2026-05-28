@@ -5,28 +5,28 @@
 #
 # Licensed under GNU Lesser General Public License v3.0
 #
-"""Tests for ConfigMixin."""
+"""Tests for DLCBaseConfig."""
 
 import pytest
-from pydantic import BaseModel, ConfigDict, Field, ValidationError
+from pydantic import ConfigDict, Field, ValidationError
 
-from deeplabcut.core.config import ConfigMixin
+from deeplabcut.core.config import DLCBaseConfig
 
 
-class ToyConfig(ConfigMixin, BaseModel):
-    """Minimal config used to exercise ConfigMixin."""
+class ToyConfig(DLCBaseConfig):
+    """Minimal config used to exercise DLCBaseConfig."""
 
     model_config = ConfigDict(extra="forbid", validate_assignment=True)
     Task: str = "DefaultTask"
     project_path: str = "DefaultProjectPath"
 
 
-class NestedInner(ConfigMixin, BaseModel):
+class NestedInner(DLCBaseConfig):
     lr: float = 0.001
     momentum: float = 0.9
 
 
-class NestedOuter(ConfigMixin, BaseModel):
+class NestedOuter(DLCBaseConfig):
     name: str = "outer"
     inner: NestedInner | None = Field(default_factory=NestedInner)
 

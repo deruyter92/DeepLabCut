@@ -13,13 +13,13 @@
 from pathlib import Path
 from typing import Any
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import Field
 
-from deeplabcut.core.config.mixins import ChangeTrackingMixin, ConfigMixin
-from deeplabcut.core.config.versioning import CURRENT_CONFIG_VERSION, MigrationMixin
+from deeplabcut.core.config.base_config import DLCVersionedConfig
+from deeplabcut.core.config.versioning import CURRENT_CONFIG_VERSION
 
 
-class ProjectConfig(ChangeTrackingMixin, MigrationMixin, ConfigMixin, BaseModel):
+class ProjectConfig(DLCVersionedConfig):
     """Complete project configuration.
 
     Mirrors the structure of the project config.yaml (and metadata in pose config).
@@ -68,8 +68,6 @@ class ProjectConfig(ChangeTrackingMixin, MigrationMixin, ConfigMixin, BaseModel)
         move2corner: Refinement move-to-corner flag.
         SuperAnimalConversionTables: Conversion tables for SuperAnimal weights.
     """
-
-    model_config = ConfigDict(extra="forbid", validate_assignment=True)
 
     config_version: int = CURRENT_CONFIG_VERSION
     # Project definitions (do not edit)

@@ -16,14 +16,14 @@ import warnings
 from pathlib import Path
 
 import numpy as np
-from pydantic import BaseModel, model_validator
+from pydantic import model_validator
 from typing_extensions import Self
 
-from deeplabcut.core.config import ConfigMixin
+from deeplabcut.core.config import DLCBaseConfig
 from deeplabcut.core.types import PydanticNDArray
 
 
-class WeightInitialization(ConfigMixin, BaseModel):
+class WeightInitialization(DLCBaseConfig):
     """Configures weights initialization when transfer learning or fine-tuning models
 
     Args:

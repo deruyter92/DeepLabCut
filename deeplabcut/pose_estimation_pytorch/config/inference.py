@@ -12,12 +12,12 @@
 
 from typing import Any, Literal
 
-from pydantic import BaseModel, Field
+from pydantic import Field
 
-from deeplabcut.core.config.mixins import ConfigMixin
+from deeplabcut.core.config import DLCBaseConfig
 
 
-class MultithreadingConfig(ConfigMixin, BaseModel):
+class MultithreadingConfig(DLCBaseConfig):
     """Multithreading configuration for inference.
 
     Attributes:
@@ -31,7 +31,7 @@ class MultithreadingConfig(ConfigMixin, BaseModel):
     timeout: float = 30.0
 
 
-class CompileConfig(ConfigMixin, BaseModel):
+class CompileConfig(DLCBaseConfig):
     """Model compilation configuration for inference optimization.
 
     Attributes:
@@ -43,7 +43,7 @@ class CompileConfig(ConfigMixin, BaseModel):
     backend: str = "inductor"
 
 
-class AutocastConfig(ConfigMixin, BaseModel):
+class AutocastConfig(DLCBaseConfig):
     """Automatic mixed precision configuration.
 
     Attributes:
@@ -54,7 +54,7 @@ class AutocastConfig(ConfigMixin, BaseModel):
     enabled: bool = False
 
 
-class EvaluationConfig(ConfigMixin, BaseModel):
+class EvaluationConfig(DLCBaseConfig):
     """Configuration for evaluation metrics computation.
 
     Attributes:
@@ -77,7 +77,7 @@ class EvaluationConfig(ConfigMixin, BaseModel):
     force_multi_animal: bool = False
 
 
-class InferenceConfig(ConfigMixin, BaseModel):
+class InferenceConfig(DLCBaseConfig):
     """Complete inference configuration.
 
     Attributes:

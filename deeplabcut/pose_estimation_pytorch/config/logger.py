@@ -13,9 +13,7 @@
 from enum import Enum
 from typing import Literal
 
-from pydantic import BaseModel
-
-from deeplabcut.core.config.mixins import ConfigMixin
+from deeplabcut.core.config import DLCBaseConfig
 
 
 class LoggerType(str, Enum):
@@ -23,7 +21,7 @@ class LoggerType(str, Enum):
     CSVLogger = "CSVLogger"
 
 
-class LoggerConfig(ConfigMixin, BaseModel):
+class LoggerConfig(DLCBaseConfig):
     """Base configuration for all loggers.
 
     Attributes:

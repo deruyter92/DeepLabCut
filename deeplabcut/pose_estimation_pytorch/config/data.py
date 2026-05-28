@@ -13,9 +13,9 @@
 from enum import Enum
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import ConfigDict, Field, field_validator
 
-from deeplabcut.core.config.mixins import ConfigMixin
+from deeplabcut.core.config import DLCBaseConfig
 
 
 class DataLoaderType(str, Enum):
@@ -23,7 +23,7 @@ class DataLoaderType(str, Enum):
     COCOLoader = "COCOLoader"
 
 
-class DataLoaderConfig(ConfigMixin, BaseModel):
+class DataLoaderConfig(DLCBaseConfig):
     """Base class for data loader configuration.
 
     Attributes:
@@ -33,7 +33,7 @@ class DataLoaderConfig(ConfigMixin, BaseModel):
     type: str
 
 
-class DLCLoaderConfig(DataLoaderConfig):
+class DLCLoaderConfig(DLCBaseConfig):
     """Configuration for DeepLabCut Loader.
 
     Attributes:
@@ -51,7 +51,7 @@ class DLCLoaderConfig(DataLoaderConfig):
     modelprefix: str = ""
 
 
-class COCOLoaderConfig(DataLoaderConfig):
+class COCOLoaderConfig(DLCBaseConfig):
     """Configuration for COCO Loader.
 
     Attributes:
@@ -70,7 +70,7 @@ class COCOLoaderConfig(DataLoaderConfig):
     val_json_path: str = "val.json"
 
 
-class DataTransformationConfig(ConfigMixin, BaseModel):
+class DataTransformationConfig(DLCBaseConfig):
     """Data transformation configuration.
 
     Attributes:
@@ -112,7 +112,7 @@ class DataTransformationConfig(ConfigMixin, BaseModel):
     collate: dict | None = None
 
 
-class GenSamplingConfig(ConfigMixin, BaseModel):
+class GenSamplingConfig(DLCBaseConfig):
     """Configuration for CTD models.
 
     Args:
@@ -150,7 +150,7 @@ class GenSamplingConfig(ConfigMixin, BaseModel):
         }
 
 
-class DataConfig(ConfigMixin, BaseModel):
+class DataConfig(DLCBaseConfig):
     """Complete data configuration.
 
     Attributes:

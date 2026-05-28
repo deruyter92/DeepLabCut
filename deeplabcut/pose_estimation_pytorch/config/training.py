@@ -10,13 +10,11 @@
 #
 """Training configuration classes for DeepLabCut pose estimation models."""
 
-from pydantic import BaseModel
-
-from deeplabcut.core.config.mixins import ConfigMixin
+from deeplabcut.core.config import DLCBaseConfig
 from deeplabcut.core.weight_init import WeightInitialization
 
 
-class TrainSettingsConfig(ConfigMixin, BaseModel):
+class TrainSettingsConfig(DLCBaseConfig):
     """Training settings configuration.
 
     Attributes:

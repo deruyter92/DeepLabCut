@@ -13,11 +13,11 @@
 from enum import Enum
 from pathlib import Path
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import Field
 
-from deeplabcut.core.config.mixins import ConfigMixin
+from deeplabcut.core.config import DLCBaseConfig, DLCVersionedConfig
 from deeplabcut.core.config.project_config import ProjectConfig
-from deeplabcut.core.config.versioning import CURRENT_CONFIG_VERSION, MigrationMixin
+from deeplabcut.core.config.versioning import CURRENT_CONFIG_VERSION
 from deeplabcut.pose_estimation_pytorch.config.data import DataConfig
 from deeplabcut.pose_estimation_pytorch.config.inference import InferenceConfig
 from deeplabcut.pose_estimation_pytorch.config.logger import (
@@ -107,7 +107,7 @@ class DatasetType(str, Enum):
     MULTIANIMAL_IMGAUG = "multi-animal-imgaug"
 
 
-class DetectorConfig(ConfigMixin, BaseModel):
+class DetectorConfig(DLCBaseConfig):
     model: DetectorModelConfig
     device: str = "auto"
     data: DataConfig | None = None
@@ -116,7 +116,7 @@ class DetectorConfig(ConfigMixin, BaseModel):
     inference: InferenceConfig = Field(default_factory=InferenceConfig)
 
 
-class PoseConfig(MigrationMixin, ConfigMixin, BaseModel):
+class PoseConfig(DLCVersionedConfig):
     """Main configuration class for DeepLabCut pose estimation models.
 
     This is the top-level configuration that brings together all the different
@@ -137,8 +137,6 @@ class PoseConfig(MigrationMixin, ConfigMixin, BaseModel):
         with_center_keypoints: Whether to include center keypoints (for DEKR models)
     """
 
-    model_config = ConfigDict(extra="forbid", validate_assignment=True)
-
     config_version: int = CURRENT_CONFIG_VERSION
     model: ModelConfig = Field(default_factory=ModelConfig)
     net_type: NetType = NetType.RESNET_50
@@ -154,7 +152,7 @@ class PoseConfig(MigrationMixin, ConfigMixin, BaseModel):
     detector: DetectorConfig | None = None
 
 
-class TestConfig(ConfigMixin, BaseModel):
+class TestConfig(DLCBaseConfig):
     """Configuration class for DeepLabCut test/inference settings.
 
     This configuration is used for downstream tracking and evaluation, containing
@@ -170,8 +168,6 @@ class TestConfig(ConfigMixin, BaseModel):
         global_scale: Global scale factor for inference.
         scoremap_dir: Directory for score maps.
     """
-
-    model_config = ConfigDict(extra="forbid", validate_assignment=True)
 
     # TODO @deruyter92 2026-02-05: Is this additional configuration really needed?
     # We could aim for using the PoseConfig class or InferenceConfig class instead.

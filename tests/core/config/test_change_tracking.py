@@ -5,21 +5,19 @@
 #
 # Licensed under GNU Lesser General Public License v3.0
 #
-"""Tests for ChangeTrackingMixin."""
+"""Tests for change tracking on DLCVersionedConfig."""
 
 from __future__ import annotations
 
 import logging
 
 import pytest
-from pydantic import BaseModel, ConfigDict, ValidationError
+from pydantic import ValidationError
 
-from deeplabcut.core.config.mixins import ChangeTrackingMixin, ConfigMixin
-from deeplabcut.core.config.versioning import MigrationMixin
+from deeplabcut.core.config import DLCVersionedConfig
 
 
-class TrackedConfig(ChangeTrackingMixin, ConfigMixin, BaseModel):
-    model_config = ConfigDict(validate_assignment=True)
+class TrackedConfig(DLCVersionedConfig):
     name: str = "default"
     count: int = 0
     flag: bool = False
@@ -176,7 +174,7 @@ class TestLogChanges:
 
 
 # ------------------------------------------------------------------
-# Integration with ConfigMixin.from_yaml
+# Integration with DLCBaseConfig.from_yaml
 # ------------------------------------------------------------------
 
 
@@ -228,22 +226,20 @@ class TestValidateAssignment:
 
 
 # ------------------------------------------------------------------
-# ChangeTrackingMixin + MigrationMixin combined
+# DLCVersionedConfig (migration + change tracking)
 # ------------------------------------------------------------------
 
 
-class TrackedMigratingConfig(ChangeTrackingMixin, MigrationMixin, ConfigMixin, BaseModel):
-    """Mirrors real usage (e.g. ProjectConfig) where both mixins are active."""
+class TrackedMigratingConfig(DLCVersionedConfig):
+    """Mirrors real usage (e.g. ProjectConfig)."""
 
-    model_config = ConfigDict(validate_assignment=True)
     name: str = "default"
     count: int = 0
     flag: bool = False
 
 
-class TestChangeTrackingWithMigrationMixin:
-    """Verify that validate_assignment works correctly when
-    ChangeTrackingMixin and MigrationMixin are combined (regression tests)."""
+class TestChangeTrackingWithMigration:
+    """Verify validate_assignment with versioning + change tracking (regression)."""
 
     def test_valid_assignment_still_works(self):
         cfg = TrackedMigratingConfig()
