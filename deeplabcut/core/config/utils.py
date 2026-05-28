@@ -100,6 +100,7 @@ def resolve_aliases_in_dict(
     cfg_dict: dict,
     alias_map: dict[str, str],
     *,
+    target: str = "config",
     stacklevel: int = 3,
 ) -> dict:
     """Rename deprecated config keys to their canonical names.
@@ -107,14 +108,24 @@ def resolve_aliases_in_dict(
     Args:
         cfg_dict: Raw configuration mapping (e.g. from YAML).
         alias_map: ``{alias: canonical_name}`` for deprecated keys.
+        target: Config class name shown in errors.
         stacklevel: Passed to :func:`warnings.warn` for deprecation messages.
 
     Returns:
         A new dict with alias keys replaced by canonical names. Unchanged if
         ``alias_map`` is empty.
+
+    Raises:
+        TypeError: If both an alias and its canonical name are present.
     """
     if not alias_map:
         return cfg_dict
+
+    for alias, canonical in alias_map.items():
+        if alias in cfg_dict and canonical in cfg_dict:
+            raise TypeError(f"{target} received both '{alias}' and '{canonical}'. Use only '{canonical}'.")
+
+    from deeplabcut.utils.deprecation import DLCDeprecationWarning
 
     resolved = {}
     for k, v in cfg_dict.items():
@@ -122,7 +133,7 @@ def resolve_aliases_in_dict(
         if canonical is not None:
             warnings.warn(
                 f"Config key '{k}' is deprecated, use '{canonical}' instead.",
-                DeprecationWarning,
+                DLCDeprecationWarning,
                 stacklevel=stacklevel,
             )
             k = canonical

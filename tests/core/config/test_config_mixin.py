@@ -8,17 +8,20 @@
 """Tests for DLCBaseConfig."""
 
 import pytest
-from pydantic import ConfigDict, Field, ValidationError
+from pydantic import Field, ValidationError
 
 from deeplabcut.core.config import DLCBaseConfig
+from deeplabcut.utils.deprecation import DLCDeprecationWarning
 
 
 class ToyConfig(DLCBaseConfig):
     """Minimal config used to exercise DLCBaseConfig."""
 
-    model_config = ConfigDict(extra="forbid", validate_assignment=True)
     Task: str = "DefaultTask"
-    project_path: str = "DefaultProjectPath"
+    project_path: str = Field(
+        default="DefaultProjectPath",
+        json_schema_extra={"aliases": ["projectPath"]},
+    )
 
 
 class NestedInner(DLCBaseConfig):
@@ -147,19 +150,62 @@ class TestSelect:
 
 
 # ------------------------------------------------------------------
-# validate_dict
+# model_validate / extra=forbid
 # ------------------------------------------------------------------
 
 
-class TestValidateDict:
-    def test_validate_dict_returns_instance(self):
-        cfg = ToyConfig.validate_dict({"Task": "task", "project_path": ""})
+class TestModelValidate:
+    def test_model_validate_returns_instance(self):
+        cfg = ToyConfig.model_validate({"Task": "task", "project_path": ""})
         assert isinstance(cfg, ToyConfig)
         assert cfg.Task == "task"
 
-    def test_validate_dict_rejects_extra_keys(self):
+    def test_model_validate_rejects_extra_keys(self):
         with pytest.raises(ValidationError):
-            ToyConfig.validate_dict({"Task": "ok", "project_path": "", "extra": 1})
+            ToyConfig.model_validate({"Task": "ok", "project_path": "", "extra": 1})
+
+
+# ------------------------------------------------------------------
+# aliases
+# ------------------------------------------------------------------
+
+
+class TestAliases:
+    def test_model_validate_resolves_alias_without_from_dict(self):
+        with pytest.warns(DLCDeprecationWarning, match="projectPath"):
+            cfg = ToyConfig.model_validate({"Task": "t", "projectPath": "/alias"})
+        assert cfg.project_path == "/alias"
+
+    def test_model_validate_rejects_alias_and_canonical_together(self):
+        with pytest.raises(TypeError, match="both 'projectPath' and 'project_path'"):
+            ToyConfig.model_validate({"Task": "t", "projectPath": "/alias", "project_path": "/canonical"})
+
+    def test_getitem_alias_warns_and_reads_canonical(self):
+        cfg = ToyConfig(project_path="/p")
+        with pytest.warns(DLCDeprecationWarning, match="projectPath"):
+            assert cfg["projectPath"] == "/p"
+
+    def test_setitem_alias_warns_once_and_writes_canonical(self):
+        cfg = ToyConfig()
+        with pytest.warns(DLCDeprecationWarning, match="projectPath") as record:
+            cfg["projectPath"] = "/new"
+        assert len(record) == 1
+        assert cfg.project_path == "/new"
+
+    def test_setattr_alias_warns_and_validates(self):
+        cfg = ToyConfig()
+        with pytest.warns(DLCDeprecationWarning, match="projectPath"):
+            cfg.projectPath = "/attr"
+        assert cfg.project_path == "/attr"
+
+    def test_getattr_alias_warns(self):
+        cfg = ToyConfig(project_path="/p")
+        with pytest.warns(DLCDeprecationWarning, match="projectPath"):
+            assert cfg.projectPath == "/p"
+
+    def test_contains_accepts_alias(self):
+        cfg = ToyConfig()
+        assert "projectPath" in cfg
 
 
 # ------------------------------------------------------------------
@@ -196,16 +242,6 @@ def test_from_any_with_dict_returns_instance():
     assert cfg.Task == "y"
 
 
-def test_from_any_with_dictconfig_emits_deprecation_warning():
-    from omegaconf import OmegaConf
-
-    dc = OmegaConf.create({"Task": "z", "project_path": "/dc"})
-    with pytest.warns(DeprecationWarning, match="DictConfig is deprecated"):
-        cfg = ToyConfig.from_any(dc)
-    assert isinstance(cfg, ToyConfig)
-    assert cfg.Task == "z"
-
-
 def test_from_any_with_invalid_type_raises():
     with pytest.raises(TypeError, match="Expected.*Got <class 'int'>"):
         ToyConfig.from_any(42)
@@ -224,16 +260,6 @@ def test_to_dict_returns_dict():
     d = cfg.to_dict()
     assert isinstance(d, dict)
     assert d["Task"] == "t"
-
-
-def test_to_dictconfig_emits_deprecation_warning():
-    from omegaconf import OmegaConf
-
-    cfg = ToyConfig(Task="t", project_path="")
-    with pytest.warns(DeprecationWarning, match="to_dictconfig.*deprecated"):
-        dc = cfg.to_dictconfig()
-    assert OmegaConf.is_config(dc)
-    assert dc.Task == "t"
 
 
 def test_from_dict_to_dict_roundtrip():

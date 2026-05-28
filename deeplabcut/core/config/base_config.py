@@ -8,7 +8,8 @@ from collections.abc import Callable, Iterator
 from pathlib import Path
 from typing import Any
 
-from pydantic import ArgsKwargs, BaseModel, ConfigDict, model_validator
+from pydantic import BaseModel, ConfigDict, model_validator
+from pydantic_core import ArgsKwargs
 from ruamel.yaml.comments import CommentedMap
 from typing_extensions import Self
 
@@ -44,16 +45,41 @@ class DLCBaseConfig(BaseModel):
                 mapping[alias] = name
         return mapping
 
-    def _resolve_alias(self, name: str) -> str | None:
-        return type(self)._alias_map().get(name)
+    def _resolve_alias(
+        self,
+        name: str,
+        *,
+        warn: bool = False,
+        stacklevel: int = 3,
+    ) -> str:
+        canonical = type(self)._alias_map().get(name)
+        if canonical is not None:
+            if warn:
+                from deeplabcut.utils.deprecation import DLCDeprecationWarning
 
+                warnings.warn(
+                    f"'{name}' is deprecated, use '{canonical}' instead.",
+                    DLCDeprecationWarning,
+                    stacklevel=stacklevel,
+                )
+            return canonical
+        return name
+
+    @model_validator(mode="before")
     @classmethod
-    def _resolve_aliases_in_dict(cls, cfg_dict: dict) -> dict:
-        return resolve_aliases_in_dict(cfg_dict, cls._alias_map())
+    def resolve_aliases_before_validate(cls, data: Any) -> Any:
+        if isinstance(data, ArgsKwargs):
+            names = list(cls.model_fields.keys())
+            data = dict(
+                zip(names, data.args or [], strict=False),
+                **(data.kwargs or {}),
+            )
+        if isinstance(data, dict):
+            return resolve_aliases_in_dict(data, cls._alias_map(), target=cls.__name__)
+        return data
 
     @classmethod
     def from_dict(cls, cfg_dict: dict) -> Self:
-        cfg_dict = cls._resolve_aliases_in_dict(cfg_dict)
         return cls.model_validate(cfg_dict)
 
     @classmethod
@@ -111,35 +137,24 @@ class DLCBaseConfig(BaseModel):
     def _post_yaml_load_updates(self, *, yaml_path: Path) -> None:
         pass
 
-    def _warn_alias(self, alias: str, canonical: str, stacklevel: int = 3) -> None:
-        warnings.warn(
-            f"'{alias}' is deprecated, use '{canonical}' instead.",
-            DeprecationWarning,
-            stacklevel=stacklevel,
-        )
+    def __setattr__(self, name: str, value: Any) -> None:
+        name = self._resolve_alias(name, warn=True, stacklevel=3)
+        super().__setattr__(name, value)
 
     def __getattr__(self, name: str) -> Any:
-        canonical = self._resolve_alias(name)
-        if canonical is not None:
-            self._warn_alias(name, canonical, stacklevel=2)
-            return getattr(self, canonical)
-        raise AttributeError(f"'{type(self).__name__}' has no attribute '{name}'")
+        if name not in type(self)._alias_map():
+            raise AttributeError(f"'{type(self).__name__}' has no attribute '{name}'")
+        return getattr(self, self._resolve_alias(name, warn=True, stacklevel=2))
 
     def __getitem__(self, key: str) -> Any:
-        canonical = self._resolve_alias(key)
-        if canonical is not None:
-            self._warn_alias(key, canonical)
-            return getattr(self, canonical)
+        key = self._resolve_alias(key, warn=True, stacklevel=3)
         try:
             return getattr(self, key)
         except AttributeError:
             raise KeyError(key) from None
 
     def __setitem__(self, key: str, value: Any) -> None:
-        canonical = self._resolve_alias(key)
-        if canonical is not None:
-            self._warn_alias(key, canonical)
-            key = canonical
+        key = self._resolve_alias(key, warn=False)
         if key not in self._field_names():
             raise KeyError(f"'{type(self).__name__}' has no field '{key}'")
         setattr(self, key, value)
@@ -149,7 +164,7 @@ class DLCBaseConfig(BaseModel):
             return False
         if key in self._field_names():
             return True
-        return self._resolve_alias(key) is not None
+        return key in type(self)._alias_map()
 
     def __iter__(self) -> Iterator[str]:
         return iter(self._field_names())
@@ -193,21 +208,18 @@ class DLCBaseConfig(BaseModel):
 class DLCVersionedConfig(DLCBaseConfig):
     """Configuration class for all DeepLabCut configurations with versioning."""
 
+    _CHANGE_TRACKING_INTERNALS = frozenset(
+        {
+            "_dirty_fields",
+            "_change_notes",
+            "_change_tracking_initialized",
+        }
+    )
+
     @model_validator(mode="before")
     @classmethod
     def migrate_before_validate(cls, data: Any) -> Any:
-        """Migrate raw input data to the current config version.
-
-        Converts ``ArgsKwargs`` (positional / keyword constructor args) to a
-        plain dict, then runs the migration chain.  Already-constructed
-        instances and non-dict data are returned unchanged.
-        """
-        if isinstance(data, ArgsKwargs):
-            names = list(cls.model_fields.keys())
-            data = dict(
-                zip(names, data.args or [], strict=False),
-                **(data.kwargs or {}),
-            )
+        """Migrate raw input data to the current config version."""
         if isinstance(data, dict):
             data = migrate_config(data, target_version=CURRENT_CONFIG_VERSION)
         return data
@@ -240,20 +252,17 @@ class DLCVersionedConfig(DLCBaseConfig):
             original_setattr = cls.__setattr__
 
             def __setattr__(self, name: str, value: Any) -> None:
-                if name in (
-                    "_dirty_fields",
-                    "_change_notes",
-                    "_change_tracking_initialized",
-                ):
+                if name in type(self)._CHANGE_TRACKING_INTERNALS:
                     object.__setattr__(self, name, value)
                     return
+                canonical = self._resolve_alias(name, warn=False)
                 field_names = list(type(self).model_fields.keys())
                 dirty_fields = getattr(self, "_dirty_fields", None)
-                if dirty_fields is not None and name in field_names:
-                    old = getattr(self, name)
+                if dirty_fields is not None and canonical in field_names:
+                    old = getattr(self, canonical)
                     original_setattr(self, name, value)
                     if old != value:
-                        dirty_fields.add(name)
+                        dirty_fields.add(canonical)
                 else:
                     original_setattr(self, name, value)
 
