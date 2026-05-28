@@ -26,57 +26,55 @@ logger = logging.getLogger(__name__)
 
 
 class DLCBaseConfig(BaseModel):
-    """Base configuration class for all DeepLabCut configurations."""
+    """Pydantic base for DeepLabCut configuration models.
+
+    This class is used to create configuration models for DeepLabCut.
+    It provides a base class for all configuration models that need YAML/dict I/O
+    and optional deprecated field names via ``json_schema_extra["aliases"]``.
+    (Use for all nested configs, e.g. pytorch ``DataConfig``, ``InferenceConfig``, etc.)
+
+    For project-level schema migration and dirty-field tracking, subclass
+    `DLCVersionedConfig` instead.
+
+    Features:
+
+    - Strict schema (`extra="forbid"`, `validate_assignment=True`).
+    - Load and save: `from_yaml`, `from_dict`, `from_any`, `to_yaml`, `to_dict`.
+    - Pretty-print via `print`.
+    - Hooks: `_post_yaml_load_updates`.
+    - Nested dot-notation via `select`.
+    - Dict-like access over declared fields (legacy compatibility).
+    - Field aliases from `json_schema_extra`.
+    """
 
     model_config = ConfigDict(extra="forbid", validate_assignment=True)
 
-    @classmethod
-    @functools.cache
-    def _alias_map(cls) -> dict[str, str]:
-        """Build ``{alias: canonical_name}`` from ``json_schema_extra``."""
-        mapping: dict[str, str] = {}
-        for name, info in cls.model_fields.items():
-            extra = info.json_schema_extra
-            if not isinstance(extra, dict):
-                continue
-            for alias in extra.get("aliases", []):
-                if alias in mapping:
-                    raise ValueError(f"Duplicate alias '{alias}' for fields '{mapping[alias]}' and '{name}'")
-                mapping[alias] = name
-        return mapping
-
-    def _resolve_alias(
-        self,
-        name: str,
-        *,
-        warn: bool = False,
-        stacklevel: int = 3,
-    ) -> str:
-        canonical = type(self)._alias_map().get(name)
-        if canonical is not None:
-            if warn:
-                from deeplabcut.utils.deprecation import DLCDeprecationWarning
-
-                warnings.warn(
-                    f"'{name}' is deprecated, use '{canonical}' instead.",
-                    DLCDeprecationWarning,
-                    stacklevel=stacklevel,
-                )
-            return canonical
-        return name
+    # ------------------------------------------------------------------
+    # Validation (before pydantic field validation)
+    # ------------------------------------------------------------------
 
     @model_validator(mode="before")
     @classmethod
     def resolve_aliases_before_validate(cls, data: Any) -> Any:
+        """Resolves aliases to their canonical names. (Normalizes ArgsKwargs
+        input to a dict for downstream validation.)
+
+        Args:
+            data: Raw validator input (`dict`, `ArgsKwargs`, or other).
+
+        Returns:
+            A dict with canonical field names when input is ArgsKwargs or dict;
+            otherwise `data` unchanged.
+        """
         if isinstance(data, ArgsKwargs):
-            names = list(cls.model_fields.keys())
-            data = dict(
-                zip(names, data.args or [], strict=False),
-                **(data.kwargs or {}),
-            )
+            data: dict = cls._args_kwargs_to_dict(data)
         if isinstance(data, dict):
             return resolve_aliases_in_dict(data, cls._alias_map(), target=cls.__name__)
         return data
+
+    # ------------------------------------------------------------------
+    # Construction
+    # ------------------------------------------------------------------
 
     @classmethod
     def from_dict(cls, cfg_dict: dict) -> Self:
@@ -108,6 +106,10 @@ class DLCBaseConfig(BaseModel):
         cfg._post_yaml_load_updates(yaml_path=Path(yaml_path))
         return cfg
 
+    # ------------------------------------------------------------------
+    # Serialization
+    # ------------------------------------------------------------------
+
     def to_yaml(
         self,
         yaml_path: str | Path,
@@ -134,8 +136,63 @@ class DLCBaseConfig(BaseModel):
     ) -> None:
         pretty_print(config=self.to_dict(), indent=indent, print_fn=print_fn)
 
+    # ------------------------------------------------------------------
+    # Hooks (override in subclasses)
+    # ------------------------------------------------------------------
+
     def _post_yaml_load_updates(self, *, yaml_path: Path) -> None:
         pass
+
+    # ------------------------------------------------------------------
+    # Field aliases (deprecated names in json_schema_extra)
+    # ------------------------------------------------------------------
+
+    @classmethod
+    @functools.cache
+    def _alias_map(cls) -> dict[str, str]:
+        """Build a map of deprecated aliases to canonical field names.
+
+        Returns:
+            Dict mapping each alias in `json_schema_extra["aliases"]` to its
+            canonical field name.
+
+        Raises:
+            ValueError: If the same alias is declared on more than one field.
+        """
+        mapping: dict[str, str] = {}
+        for name, info in cls.model_fields.items():
+            extra = info.json_schema_extra
+            if not isinstance(extra, dict):
+                continue
+            for alias in extra.get("aliases", []):
+                if alias in mapping:
+                    raise ValueError(f"Duplicate alias '{alias}' for fields '{mapping[alias]}' and '{name}'")
+                mapping[alias] = name
+        return mapping
+
+    def _resolve_alias(
+        self,
+        name: str,
+        *,
+        warn: bool = False,
+        stacklevel: int = 3,
+    ) -> str:
+        canonical = type(self)._alias_map().get(name)
+        if canonical is not None:
+            if warn:
+                from deeplabcut.utils.deprecation import DLCDeprecationWarning
+
+                warnings.warn(
+                    f"'{name}' is deprecated, use '{canonical}' instead.",
+                    DLCDeprecationWarning,
+                    stacklevel=stacklevel,
+                )
+            return canonical
+        return name
+
+    # ------------------------------------------------------------------
+    # Dict-like access (canonical field names only in keys()/iter)
+    # ------------------------------------------------------------------
 
     def __setattr__(self, name: str, value: Any) -> None:
         name = self._resolve_alias(name, warn=True, stacklevel=3)
@@ -204,9 +261,34 @@ class DLCBaseConfig(BaseModel):
             raise TypeError(f"{cls.__name__} must inherit from pydantic.BaseModel")
         return list(cls.model_fields.keys())
 
+    @classmethod
+    def _args_kwargs_to_dict(cls, data: ArgsKwargs) -> dict:
+        """Map positional and keyword constructor args to a field-name dict."""
+        names = list(cls.model_fields.keys())
+        return dict(
+            zip(names, data.args or [], strict=False),
+            **(data.kwargs or {}),
+        )
+
 
 class DLCVersionedConfig(DLCBaseConfig):
-    """Configuration class for all DeepLabCut configurations with versioning."""
+    """Top-level configs with schema migration and change tracking.
+
+    Subclass of `DLCBaseConfig` for project and pose YAML configs such as
+    `ProjectConfig` and `PoseConfig`.
+
+    Note:
+        Pydantic runs `migrate_before_validate` before the base
+        `resolve_aliases_before_validate` (child-first order): schema migration
+        on legacy keys, then alias resolution for the current model.
+
+    Additional behavior:
+
+    - `migrate_before_validate` upgrades raw dicts to `CURRENT_CONFIG_VERSION`.
+    - Tracks fields modified after load; `to_yaml` can log changes and mark clean.
+    - Patches `__setattr__` once per class to record dirty fields while delegating
+      alias warnings to the base `__setattr__`.
+    """
 
     _CHANGE_TRACKING_INTERNALS = frozenset(
         {
@@ -216,13 +298,30 @@ class DLCVersionedConfig(DLCBaseConfig):
         }
     )
 
+    # ------------------------------------------------------------------
+    # Version migration (before pydantic field validation)
+    # ------------------------------------------------------------------
+
     @model_validator(mode="before")
     @classmethod
     def migrate_before_validate(cls, data: Any) -> Any:
-        """Migrate raw input data to the current config version."""
+        """Upgrade a raw config dict to `CURRENT_CONFIG_VERSION`.
+
+        Args:
+            data: Raw validator input (`ArgsKwargs` or `dict`).
+
+        Returns:
+            Migrated dict for input dict or ArgsKwargs. Unchanged otherwise.
+        """
+        if isinstance(data, ArgsKwargs):
+            data = cls._args_kwargs_to_dict(data)
         if isinstance(data, dict):
             data = migrate_config(data, target_version=CURRENT_CONFIG_VERSION)
         return data
+
+    # ------------------------------------------------------------------
+    # Serialization
+    # ------------------------------------------------------------------
 
     def to_yaml(
         self,
@@ -237,6 +336,10 @@ class DLCVersionedConfig(DLCBaseConfig):
             self.log_changes()
         if mark_clean:
             self.mark_clean()
+
+    # ------------------------------------------------------------------
+    # Change tracking
+    # ------------------------------------------------------------------
 
     def model_post_init(self, __context: Any) -> None:
         super().model_post_init(__context)
