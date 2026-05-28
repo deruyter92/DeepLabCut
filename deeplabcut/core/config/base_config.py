@@ -6,13 +6,14 @@ import sys
 import warnings
 from collections.abc import Callable, Iterator
 from pathlib import Path
-from typing import Any
+from typing import Any, ClassVar
 
 from pydantic import BaseModel, ConfigDict, model_validator
 from pydantic_core import ArgsKwargs
 from ruamel.yaml.comments import CommentedMap
 from typing_extensions import Self
 
+from deeplabcut.core.config import versioning
 from deeplabcut.core.config.utils import (
     normalize_for_serialization,
     pretty_print,
@@ -20,7 +21,7 @@ from deeplabcut.core.config.utils import (
     resolve_aliases_in_dict,
     write_config,
 )
-from deeplabcut.core.config.versioning import CURRENT_CONFIG_VERSION, migrate_config
+from deeplabcut.core.config.versioning import migrate_config
 
 logger = logging.getLogger(__name__)
 
@@ -290,7 +291,7 @@ class DLCVersionedConfig(DLCBaseConfig):
       alias warnings to the base `__setattr__`.
     """
 
-    _CHANGE_TRACKING_INTERNALS = frozenset(
+    _CHANGE_TRACKING_INTERNALS: ClassVar[frozenset[str]] = frozenset(
         {
             "_dirty_fields",
             "_change_notes",
@@ -316,7 +317,7 @@ class DLCVersionedConfig(DLCBaseConfig):
         if isinstance(data, ArgsKwargs):
             data = cls._args_kwargs_to_dict(data)
         if isinstance(data, dict):
-            data = migrate_config(data, target_version=CURRENT_CONFIG_VERSION)
+            data = migrate_config(data, target_version=versioning.CURRENT_CONFIG_VERSION)
         return data
 
     # ------------------------------------------------------------------
