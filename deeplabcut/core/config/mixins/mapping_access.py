@@ -2,30 +2,32 @@ from __future__ import annotations
 
 import functools
 import warnings
-from dataclasses import fields
-from typing import Any, Iterator
+from collections.abc import Iterator
+from typing import Any
+
+from pydantic import BaseModel
 
 
 class MappingAccessMixin:
-    """Dict-like access protocol for typed config dataclasses.
+    """Dict-like access protocol for typed pydantic BaseModel configs.
 
     Supports key access, membership checks, iteration helpers, and dot-path
-    selection while preserving dataclass field semantics.
+    selection while preserving model field semantics.
     """
 
     @classmethod
     @functools.cache
     def _alias_map(cls) -> dict[str, str]:
-        """Build ``{alias: canonical_name}`` from field metadata."""
+        """Build ``{alias: canonical_name}`` from ``json_schema_extra``."""
         mapping: dict[str, str] = {}
-        for f in fields(cls):
-            for alias in f.metadata.get("aliases", []):
+        for name, info in cls.model_fields.items():
+            extra = info.json_schema_extra
+            if not isinstance(extra, dict):
+                continue
+            for alias in extra.get("aliases", []):
                 if alias in mapping:
-                    raise ValueError(
-                        f"Duplicate alias '{alias}' for fields "
-                        f"'{mapping[alias]}' and '{f.name}'"
-                    )
-                mapping[alias] = f.name
+                    raise ValueError(f"Duplicate alias '{alias}' for fields '{mapping[alias]}' and '{name}'")
+                mapping[alias] = name
         return mapping
 
     def _resolve_alias(self, name: str) -> str | None:
@@ -53,7 +55,7 @@ class MappingAccessMixin:
         try:
             return getattr(self, key)
         except AttributeError:
-            raise KeyError(key)
+            raise KeyError(key) from None
 
     def __setitem__(self, key: str, value: Any) -> None:
         canonical = self._resolve_alias(key)
@@ -75,7 +77,7 @@ class MappingAccessMixin:
         return iter(self._field_names())
 
     def __len__(self) -> int:
-        return len(fields(self))
+        return len(self._field_names())
 
     def get(self, key: str, default: Any = None) -> Any:
         try:
@@ -87,10 +89,10 @@ class MappingAccessMixin:
         return self._field_names()
 
     def values(self) -> list[Any]:
-        return [getattr(self, f.name) for f in fields(self)]
+        return [getattr(self, name) for name in self._field_names()]
 
     def items(self) -> list[tuple[str, Any]]:
-        return [(f.name, getattr(self, f.name)) for f in fields(self)]
+        return [(name, getattr(self, name)) for name in self._field_names()]
 
     def select(self, path: str, default: Any = None) -> Any:
         obj: Any = self
@@ -104,4 +106,7 @@ class MappingAccessMixin:
         return obj
 
     def _field_names(self) -> list[str]:
-        return [f.name for f in fields(self)]
+        cls = type(self)
+        if not isinstance(self, BaseModel):
+            raise TypeError(f"{cls.__name__} must inherit from pydantic.BaseModel to use MappingAccessMixin")
+        return list(cls.model_fields.keys())

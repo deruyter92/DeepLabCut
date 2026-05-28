@@ -6,32 +6,29 @@
 # Licensed under GNU Lesser General Public License v3.0
 #
 """Tests for ConfigMixin."""
-from pathlib import Path
 
 import pytest
-from pydantic.dataclasses import dataclass
-from dataclasses import field
+from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
 from deeplabcut.core.config import ConfigMixin
 
 
-@dataclass
-class ToyConfig(ConfigMixin):
+class ToyConfig(ConfigMixin, BaseModel):
     """Minimal config used to exercise ConfigMixin."""
+
+    model_config = ConfigDict(extra="forbid", validate_assignment=True)
     Task: str = "DefaultTask"
     project_path: str = "DefaultProjectPath"
 
 
-@dataclass
-class NestedInner(ConfigMixin):
+class NestedInner(ConfigMixin, BaseModel):
     lr: float = 0.001
     momentum: float = 0.9
 
 
-@dataclass
-class NestedOuter(ConfigMixin):
+class NestedOuter(ConfigMixin, BaseModel):
     name: str = "outer"
-    inner: NestedInner | None = field(default_factory=NestedInner)
+    inner: NestedInner | None = Field(default_factory=NestedInner)
 
 
 # ------------------------------------------------------------------
@@ -161,9 +158,8 @@ class TestValidateDict:
         assert cfg.Task == "task"
 
     def test_validate_dict_rejects_extra_keys(self):
-        """ToyConfig has no extra='forbid', so extra keys are just ignored."""
-        cfg = ToyConfig.validate_dict({"Task": "ok", "project_path": "", "extra": 1})
-        assert cfg.Task == "ok"
+        with pytest.raises(ValidationError):
+            ToyConfig.validate_dict({"Task": "ok", "project_path": "", "extra": 1})
 
 
 # ------------------------------------------------------------------
@@ -179,7 +175,6 @@ def test_from_dict_returns_instance():
 
 
 def test_from_dict_incomplete_uses_defaults():
-    """Missing keys in dict input are filled from ToyConfig defaults."""
     cfg = ToyConfig.from_dict({"Task": "custom_task"})
     assert cfg.Task == "custom_task"
     assert cfg.project_path == "DefaultProjectPath"

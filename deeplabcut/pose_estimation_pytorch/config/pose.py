@@ -10,28 +10,26 @@
 #
 """Main pose configuration class for DeepLabCut pose estimation models."""
 
-
-from pydantic.dataclasses import dataclass
-from dataclasses import field
-from pydantic import Field, ConfigDict
 from enum import Enum
 from pathlib import Path
 
+from pydantic import BaseModel, ConfigDict, Field
+
 from deeplabcut.core.config.mixins import ConfigMixin
-from deeplabcut.core.config.versioning import CURRENT_CONFIG_VERSION, MigrationMixin
 from deeplabcut.core.config.project_config import ProjectConfig
+from deeplabcut.core.config.versioning import CURRENT_CONFIG_VERSION, MigrationMixin
 from deeplabcut.pose_estimation_pytorch.config.data import DataConfig
-from deeplabcut.pose_estimation_pytorch.config.training import TrainSettingsConfig
-from deeplabcut.pose_estimation_pytorch.config.runner import RunnerConfig
 from deeplabcut.pose_estimation_pytorch.config.inference import InferenceConfig
-from deeplabcut.pose_estimation_pytorch.config.model import (
-    ModelConfig,
-    DetectorModelConfig,
-)
 from deeplabcut.pose_estimation_pytorch.config.logger import (
     CSVLoggerConfig,
     WandbLoggerConfig,
 )
+from deeplabcut.pose_estimation_pytorch.config.model import (
+    DetectorModelConfig,
+    ModelConfig,
+)
+from deeplabcut.pose_estimation_pytorch.config.runner import RunnerConfig
+from deeplabcut.pose_estimation_pytorch.config.training import TrainSettingsConfig
 
 
 class MethodType(str, Enum):
@@ -104,22 +102,21 @@ class NetType(str, Enum):
 
 class DatasetType(str, Enum):
     """Enumeration of dataset types."""
+
     # TODO @deruyter92 2026-02-05: Add other dataset types as needed.
     MULTIANIMAL_IMGAUG = "multi-animal-imgaug"
 
 
-@dataclass
-class DetectorConfig(ConfigMixin):
+class DetectorConfig(ConfigMixin, BaseModel):
     model: DetectorModelConfig
     device: str = "auto"
     data: DataConfig | None = None
     runner: RunnerConfig | None = None
     train_settings: TrainSettingsConfig | None = None
-    inference: InferenceConfig = field(default_factory=InferenceConfig)
+    inference: InferenceConfig = Field(default_factory=InferenceConfig)
 
 
-@dataclass(config=ConfigDict(extra="forbid", validate_assignment=True))
-class PoseConfig(MigrationMixin, ConfigMixin):
+class PoseConfig(MigrationMixin, ConfigMixin, BaseModel):
     """Main configuration class for DeepLabCut pose estimation models.
 
     This is the top-level configuration that brings together all the different
@@ -139,25 +136,25 @@ class PoseConfig(MigrationMixin, ConfigMixin):
         logger: Logger configuration (e.g., WandB or CSV logger)
         with_center_keypoints: Whether to include center keypoints (for DEKR models)
     """
+
+    model_config = ConfigDict(extra="forbid", validate_assignment=True)
+
     config_version: int = CURRENT_CONFIG_VERSION
-    model: ModelConfig = field(default_factory=ModelConfig)
+    model: ModelConfig = Field(default_factory=ModelConfig)
     net_type: NetType = NetType.RESNET_50
     method: MethodType = MethodType.BOTTOM_UP
     device: str = "auto"
     metadata: ProjectConfig | None = None
     data: DataConfig | None = None
-    inference: InferenceConfig = field(default_factory=InferenceConfig)
-    logger: CSVLoggerConfig | WandbLoggerConfig | None = Field(
-        default=None, discriminator="type"
-    )
+    inference: InferenceConfig = Field(default_factory=InferenceConfig)
+    logger: CSVLoggerConfig | WandbLoggerConfig | None = Field(default=None, discriminator="type")
     with_center_keypoints: bool = False
     runner: RunnerConfig | None = None
     train_settings: TrainSettingsConfig | None = None
     detector: DetectorConfig | None = None
 
 
-@dataclass(config=ConfigDict(extra="forbid", validate_assignment=True))
-class TestConfig(ConfigMixin):
+class TestConfig(ConfigMixin, BaseModel):
     """Configuration class for DeepLabCut test/inference settings.
 
     This configuration is used for downstream tracking and evaluation, containing
@@ -173,12 +170,15 @@ class TestConfig(ConfigMixin):
         global_scale: Global scale factor for inference.
         scoremap_dir: Directory for score maps.
     """
+
+    model_config = ConfigDict(extra="forbid", validate_assignment=True)
+
     # TODO @deruyter92 2026-02-05: Is this additional configuration really needed?
     # We could aim for using the PoseConfig class or InferenceConfig class instead.
     dataset: Path = Path()
-    num_joints: int = 0 
-    all_joints: list[list[int]] = field(default_factory=list)
-    all_joints_names: list[str] = field(default_factory=list)
+    num_joints: int = 0
+    all_joints: list[list[int]] = Field(default_factory=list)
+    all_joints_names: list[str] = Field(default_factory=list)
     net_type: NetType = NetType.RESNET_50
     dataset_type: DatasetType = DatasetType.MULTIANIMAL_IMGAUG
     global_scale: int = 1

@@ -10,15 +10,14 @@
 #
 """Runner configuration class for DeepLabCut pose estimation models."""
 
-from pydantic.dataclasses import dataclass
-
 from typing import Any
+
+from pydantic import BaseModel
 
 from deeplabcut.core.config.mixins import ConfigMixin
 
 
-@dataclass
-class OptimizerConfig(ConfigMixin):
+class OptimizerConfig(ConfigMixin, BaseModel):
     """Optimizer configuration.
 
     Attributes:
@@ -30,8 +29,7 @@ class OptimizerConfig(ConfigMixin):
     params: dict[str, Any] | None = None
 
 
-@dataclass
-class SchedulerConfig(ConfigMixin):
+class SchedulerConfig(ConfigMixin, BaseModel):
     """Learning rate scheduler configuration.
 
     Attributes:
@@ -43,8 +41,7 @@ class SchedulerConfig(ConfigMixin):
     params: dict[str, Any] | None = None
 
 
-@dataclass
-class SnapshotCheckpointConfig(ConfigMixin):
+class SnapshotCheckpointConfig(ConfigMixin, BaseModel):
     """Snapshot configuration for model checkpoints.
 
     Attributes:
@@ -58,8 +55,7 @@ class SnapshotCheckpointConfig(ConfigMixin):
     save_optimizer_state: bool = False
 
 
-@dataclass
-class RunnerConfig(ConfigMixin):
+class RunnerConfig(ConfigMixin, BaseModel):
     """Training runner configuration.
 
     Attributes:
@@ -76,11 +72,11 @@ class RunnerConfig(ConfigMixin):
     """
 
     type: str = "PoseTrainingRunner"
-    # TODO @deruyter92: Currently different configs for device are used in 
-    # parallel. We should probably move to only 'PoseConfig.device'. This is 
+    # TODO @deruyter92: Currently different configs for device are used in
+    # parallel. We should probably move to only 'PoseConfig.device'. This is
     # kept here for backwards compatibility.
     gpus: Any | None = None
-    device: str = "auto" # <- unused, but present in test scripts. 
+    device: str = "auto"  # <- unused, but present in test scripts.
     key_metric: str = "test.mAP"
     key_metric_asc: bool = True
     eval_interval: int = 10

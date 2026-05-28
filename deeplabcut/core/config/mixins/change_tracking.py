@@ -1,10 +1,9 @@
-"""Opt-in dirty-state tracking mixin for pydantic dataclass configs."""
+"""Opt-in dirty-state tracking mixin for pydantic BaseModel configs."""
 
 from __future__ import annotations
 
 import logging
 import sys
-from dataclasses import fields
 from typing import Any
 
 logger = logging.getLogger(__name__)
@@ -13,20 +12,28 @@ logger = logging.getLogger(__name__)
 class ChangeTrackingMixin:
     """Opt-in mixin that records which fields are dirty."""
 
-    __slots__ = ("_dirty_fields", "_change_notes")
+    def model_post_init(self, __context: Any) -> None:
+        super().model_post_init(__context)
+        self._init_change_tracking()
 
-    def __post_init__(self) -> None:
-        if hasattr(super(), "__post_init__"):
-            super().__post_init__()
+    def _init_change_tracking(self) -> None:
+        if getattr(self, "_change_tracking_initialized", False):
+            return
+        object.__setattr__(self, "_change_tracking_initialized", True)
+
         cls = type(self)
         if not getattr(cls, "_change_tracking_installed", False):
             original_setattr = cls.__setattr__
 
             def __setattr__(self, name: str, value: Any) -> None:
-                if name in ("_dirty_fields", "_change_notes"):
+                if name in (
+                    "_dirty_fields",
+                    "_change_notes",
+                    "_change_tracking_initialized",
+                ):
                     object.__setattr__(self, name, value)
                     return
-                field_names = [f.name for f in fields(self)]
+                field_names = list(type(self).model_fields.keys())
                 dirty_fields = getattr(self, "_dirty_fields", None)
                 if dirty_fields is not None and name in field_names:
                     old = getattr(self, name)

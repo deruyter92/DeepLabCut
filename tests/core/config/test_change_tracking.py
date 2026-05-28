@@ -6,22 +6,20 @@
 # Licensed under GNU Lesser General Public License v3.0
 #
 """Tests for ChangeTrackingMixin."""
+
 from __future__ import annotations
 
 import logging
 
 import pytest
-from pydantic import ConfigDict
-from pydantic.dataclasses import dataclass
-
-from pydantic import ValidationError
+from pydantic import BaseModel, ConfigDict, ValidationError
 
 from deeplabcut.core.config.mixins import ChangeTrackingMixin, ConfigMixin
 from deeplabcut.core.config.versioning import MigrationMixin
 
 
-@dataclass(config=ConfigDict(validate_assignment=True))
-class TrackedConfig(ChangeTrackingMixin, ConfigMixin):
+class TrackedConfig(ChangeTrackingMixin, ConfigMixin, BaseModel):
+    model_config = ConfigDict(validate_assignment=True)
     name: str = "default"
     count: int = 0
     flag: bool = False
@@ -215,7 +213,7 @@ class TestValidateAssignment:
 
     def test_invalid_assignment_rejected_and_not_tracked(self):
         cfg = TrackedConfig()
-        with pytest.raises(Exception):
+        with pytest.raises(ValidationError):
             cfg.count = "not-an-int"
         assert cfg.count == 0
         assert not cfg.is_dirty
@@ -234,10 +232,10 @@ class TestValidateAssignment:
 # ------------------------------------------------------------------
 
 
-@dataclass(config=ConfigDict(validate_assignment=True))
-class TrackedMigratingConfig(ChangeTrackingMixin, MigrationMixin, ConfigMixin):
+class TrackedMigratingConfig(ChangeTrackingMixin, MigrationMixin, ConfigMixin, BaseModel):
     """Mirrors real usage (e.g. ProjectConfig) where both mixins are active."""
 
+    model_config = ConfigDict(validate_assignment=True)
     name: str = "default"
     count: int = 0
     flag: bool = False

@@ -1,13 +1,11 @@
 from __future__ import annotations
 
 import warnings
-from dataclasses import asdict, fields
+from collections.abc import Callable, Mapping
 from enum import Enum
 from pathlib import Path
-from typing import Callable, Mapping
 
 from omegaconf import DictConfig, OmegaConf
-from pydantic import TypeAdapter
 from ruamel.yaml.comments import CommentedMap
 from typing_extensions import Self
 
@@ -16,7 +14,7 @@ from deeplabcut.core.config.utils import pretty_print, read_config_as_dict, writ
 
 
 class ConfigMixin(MappingAccessMixin):
-    """Base mixin class for typed configuration dataclasses."""
+    """Base mixin class for typed pydantic BaseModel configurations."""
 
     @classmethod
     def _resolve_aliases_in_dict(cls, cfg_dict: dict) -> dict:
@@ -42,8 +40,7 @@ class ConfigMixin(MappingAccessMixin):
         if isinstance(cfg_dict, DictConfig):
             cfg_dict = OmegaConf.to_container(cfg_dict, resolve=True)
         cfg_dict = cls._resolve_aliases_in_dict(cfg_dict)
-        TypeAdapter(cls).validate_python(cfg_dict)
-        return cls(**cfg_dict)
+        return cls.model_validate(cfg_dict)
 
     @classmethod
     def from_dict(cls, cfg_dict: dict) -> Self:
@@ -61,8 +58,7 @@ class ConfigMixin(MappingAccessMixin):
             return cls.from_yaml(config)
         elif isinstance(config, DictConfig):
             warnings.warn(
-                "Passing an OmegaConf DictConfig is deprecated. "
-                "Pass a plain dict or a typed config instance instead.",
+                "Passing an OmegaConf DictConfig is deprecated. Pass a plain dict or a typed config instance instead.",
                 DeprecationWarning,
                 stacklevel=2,
             )
@@ -71,7 +67,7 @@ class ConfigMixin(MappingAccessMixin):
             return cls.from_dict(config)
         else:
             raise TypeError(
-                "Failure to load configuration: Expected pydantic dataclass, "
+                "Failure to load configuration: Expected pydantic BaseModel, "
                 f"dictionary, DictConfig, string, or Path. Got {type(config)}"
             )
 
@@ -93,9 +89,10 @@ class ConfigMixin(MappingAccessMixin):
     ) -> None:
         dict_data = _normalize_for_serialization(self.to_dict())
         data = CommentedMap(dict_data)
-        for f in fields(self):
-            if comment := f.metadata.get("comment"):
-                data.yaml_set_comment_before_after_key(f.name, before=comment)
+        for name, info in type(self).model_fields.items():
+            extra = info.json_schema_extra
+            if isinstance(extra, dict) and (comment := extra.get("comment")):
+                data.yaml_set_comment_before_after_key(name, before=comment)
         if hasattr(self, "log_changes") and log_changes:
             self.log_changes()
         if hasattr(self, "mark_clean") and mark_clean:
@@ -103,7 +100,7 @@ class ConfigMixin(MappingAccessMixin):
         write_config(yaml_path, data, overwrite=overwrite)
 
     def to_dict(self) -> dict:
-        return asdict(self)
+        return self.model_dump()
 
     def to_dict_normalized(self) -> dict:
         return _normalize_for_serialization(self.to_dict())
