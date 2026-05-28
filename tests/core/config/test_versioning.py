@@ -13,7 +13,7 @@
 import logging
 
 import pytest
-from pydantic import ValidationError
+from pydantic import Field, ValidationError
 
 from deeplabcut.core.config import DLCVersionedConfig, versioning
 from deeplabcut.core.config.versioning import (
@@ -21,6 +21,7 @@ from deeplabcut.core.config.versioning import (
     migrate_config,
     register_migration,
 )
+from deeplabcut.utils.deprecation import DLCDeprecationWarning
 
 _LOGGER_NAME = "deeplabcut.core.config.versioning"
 
@@ -173,7 +174,7 @@ def test_roundtrip_v98_without_toy_field_unchanged():
 
 
 # -----------------------------------------------------------------------------
-# MigrationMixin: migration prevents validation error for renamed field
+# DLCVersionedConfig: migration prevents validation error for renamed field
 # -----------------------------------------------------------------------------
 
 
@@ -187,7 +188,7 @@ def ToyConfigWithValidField():
 
 
 def test_config_with_legacy_field_raises_without_migration(monkeypatch, ToyConfigWithValidField):
-    """Initializing ProjectConfig with the legacy (wrong) field raises validation error."""
+    """Legacy unknown field raises validation error when no migration is registered."""
     monkeypatch.setattr(versioning, "CURRENT_CONFIG_VERSION", _TOY_VERSION_OLD)
     config_with_legacy_field = {
         "config_version": _TOY_VERSION_OLD,
@@ -198,7 +199,7 @@ def test_config_with_legacy_field_raises_without_migration(monkeypatch, ToyConfi
 
 
 def test_config_after_migration_accepts_renamed_field(monkeypatch, ToyConfigWithValidField):
-    """Registering a migration renames the wrong field so ProjectConfig accepts the config."""
+    """Registering a migration renames the legacy field so the model accepts the config."""
     monkeypatch.setattr(versioning, "CURRENT_CONFIG_VERSION", _TOY_VERSION_NEW)
     config_with_legacy_field = {
         "config_version": _TOY_VERSION_OLD,
@@ -218,6 +219,76 @@ def test_config_after_migration_accepts_renamed_field(monkeypatch, ToyConfigWith
 
     cfg = ToyConfigWithValidField(**config_with_legacy_field)
     assert cfg.valid_project_config_field == "some_value"
+
+
+# -----------------------------------------------------------------------------
+# Migration before alias resolution on DLCVersionedConfig
+# -----------------------------------------------------------------------------
+
+
+class _MigrateThenAliasConfig(DLCVersionedConfig):
+    config_version: int = _TOY_VERSION_NEW
+    toy_new_field: str = Field(
+        default="",
+        json_schema_extra={"aliases": ["deprecated_alias"]},
+    )
+
+
+@pytest.fixture
+def _migrate_then_alias_current(monkeypatch):
+    monkeypatch.setattr(versioning, "_MIGRATIONS", versioning._MIGRATIONS.copy())
+    monkeypatch.setattr(versioning, "CURRENT_CONFIG_VERSION", _TOY_VERSION_NEW)
+
+
+def test_migration_then_alias_legacy_version_key(_migrate_then_alias_current):
+    """v98 legacy key is renamed by migration, then validated."""
+    cfg = _MigrateThenAliasConfig.model_validate(
+        {
+            "config_version": _TOY_VERSION_OLD,
+            _LEGACY_FIELD: "from_migration",
+        }
+    )
+    assert cfg.toy_new_field == "from_migration"
+
+
+def test_migration_then_alias_same_version_deprecated_name(_migrate_then_alias_current):
+    """Same-version deprecated alias is resolved after migration (with a warning)."""
+    with pytest.warns(DLCDeprecationWarning, match="deprecated_alias"):
+        cfg = _MigrateThenAliasConfig.model_validate(
+            {
+                "config_version": _TOY_VERSION_NEW,
+                "deprecated_alias": "from_alias",
+            }
+        )
+    assert cfg.toy_new_field == "from_alias"
+
+
+def test_migration_then_alias_on_old_version_with_deprecated_alias(
+    _migrate_then_alias_current,
+):
+    """Migrate to current version, then resolve alias when v98 used the alias key."""
+    with pytest.warns(DLCDeprecationWarning, match="deprecated_alias"):
+        cfg = _MigrateThenAliasConfig.model_validate(
+            {
+                "config_version": _TOY_VERSION_OLD,
+                "deprecated_alias": "both_steps",
+            }
+        )
+    assert cfg.toy_new_field == "both_steps"
+
+
+def test_args_kwargs_input_runs_migration(_migrate_then_alias_current):
+    """Constructor ArgsKwargs is normalized before migrate_config runs."""
+
+    class _KwOnlyVersioned(DLCVersionedConfig):
+        config_version: int = _TOY_VERSION_NEW
+        toy_new_field: str = ""
+
+    cfg = _KwOnlyVersioned(
+        config_version=_TOY_VERSION_OLD,
+        **{_LEGACY_FIELD: "kwargs_value"},
+    )
+    assert cfg.toy_new_field == "kwargs_value"
 
 
 # =============================================================================
@@ -751,7 +822,7 @@ class TestMigrationLogging:
 
 
 # -----------------------------------------------------------------------------
-# MigrationMixin compatibility with validate_assignment
+# DLCVersionedConfig compatibility with validate_assignment
 # -----------------------------------------------------------------------------
 
 
@@ -760,8 +831,8 @@ class ValidatedMigratingConfig(DLCVersionedConfig):
     count: int = 0
 
 
-class TestMigrationMixinWithValidateAssignment:
-    """MigrationMixin must not interfere with validate_assignment (regression)."""
+class TestVersionedConfigValidateAssignment:
+    """Versioned config must not interfere with validate_assignment (regression)."""
 
     @pytest.fixture(autouse=True)
     def _default_version(self, monkeypatch):

@@ -12,9 +12,10 @@ from __future__ import annotations
 import logging
 
 import pytest
-from pydantic import ValidationError
+from pydantic import Field, ValidationError
 
 from deeplabcut.core.config import DLCVersionedConfig
+from deeplabcut.utils.deprecation import DLCDeprecationWarning
 
 
 class TrackedConfig(DLCVersionedConfig):
@@ -174,7 +175,7 @@ class TestLogChanges:
 
 
 # ------------------------------------------------------------------
-# Integration with DLCBaseConfig.from_yaml
+# Integration with DLCVersionedConfig.from_yaml
 # ------------------------------------------------------------------
 
 
@@ -259,3 +260,34 @@ class TestChangeTrackingWithMigration:
         cfg.count = True  # should be coerced to 1
         assert cfg.count == 1
         assert "count" in cfg.dirty_fields
+
+
+# ------------------------------------------------------------------
+# Alias access with change tracking
+# ------------------------------------------------------------------
+
+
+class TrackedAliasConfig(DLCVersionedConfig):
+    project_path: str = Field(
+        default="",
+        json_schema_extra={"aliases": ["projectPath"]},
+    )
+
+
+class TestAliasChangeTracking:
+    def test_setitem_alias_marks_canonical_field_dirty(self):
+        import warnings
+
+        cfg = TrackedAliasConfig()
+        with warnings.catch_warnings():
+            warnings.simplefilter("error", DLCDeprecationWarning)
+            cfg["projectPath"] = "/new"
+        assert cfg.project_path == "/new"
+        assert "project_path" in cfg.dirty_fields
+
+    def test_setattr_alias_marks_canonical_field_dirty(self):
+        cfg = TrackedAliasConfig()
+        with pytest.warns(DLCDeprecationWarning, match="projectPath"):
+            cfg.projectPath = "/attr"
+        assert cfg.project_path == "/attr"
+        assert "project_path" in cfg.dirty_fields

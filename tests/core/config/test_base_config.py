@@ -10,8 +10,12 @@
 import pytest
 from pydantic import Field, ValidationError
 
-from deeplabcut.core.config import DLCBaseConfig
+from deeplabcut.core.config import DLCBaseConfig, DLCVersionedConfig, versioning
 from deeplabcut.utils.deprecation import DLCDeprecationWarning
+
+_TOY_VERSION_OLD = 98
+_TOY_VERSION_NEW = 99
+_LEGACY_FIELD = "toy_legacy_field"
 
 
 class ToyConfig(DLCBaseConfig):
@@ -185,11 +189,14 @@ class TestAliases:
         with pytest.warns(DLCDeprecationWarning, match="projectPath"):
             assert cfg["projectPath"] == "/p"
 
-    def test_setitem_alias_warns_once_and_writes_canonical(self):
+    def test_setitem_alias_writes_canonical_without_double_warning(self):
+        """__setitem__ resolves the alias silently; setattr uses the canonical name."""
+        import warnings
+
         cfg = ToyConfig()
-        with pytest.warns(DLCDeprecationWarning, match="projectPath") as record:
+        with warnings.catch_warnings():
+            warnings.simplefilter("error", DLCDeprecationWarning)
             cfg["projectPath"] = "/new"
-        assert len(record) == 1
         assert cfg.project_path == "/new"
 
     def test_setattr_alias_warns_and_validates(self):
@@ -285,3 +292,41 @@ def test_print_no_error(capsys):
     cfg.print()
     out, _ = capsys.readouterr()
     assert "Task" in out
+
+
+# ------------------------------------------------------------------
+# No schema migration on DLCBaseConfig
+# ------------------------------------------------------------------
+
+
+class _ToyBaseOnly(DLCBaseConfig):
+    toy_new_field: str = ""
+
+
+class _ToyVersioned(DLCVersionedConfig):
+    config_version: int = _TOY_VERSION_NEW
+    toy_new_field: str = ""
+
+
+class TestNoMigrationOnBaseConfig:
+    """DLCBaseConfig resolves aliases but does not run version migrations."""
+
+    @pytest.fixture(autouse=True)
+    def _toy_current_version(self, monkeypatch):
+        monkeypatch.setattr(versioning, "CURRENT_CONFIG_VERSION", _TOY_VERSION_NEW)
+
+    def test_base_config_rejects_legacy_key_without_migration(self):
+        legacy_cfg = {
+            "config_version": _TOY_VERSION_OLD,
+            _LEGACY_FIELD: "value",
+        }
+        with pytest.raises(ValidationError):
+            _ToyBaseOnly.model_validate(legacy_cfg)
+
+    def test_versioned_config_applies_migration_for_same_input(self):
+        legacy_cfg = {
+            "config_version": _TOY_VERSION_OLD,
+            _LEGACY_FIELD: "value",
+        }
+        cfg = _ToyVersioned.model_validate(legacy_cfg)
+        assert cfg.toy_new_field == "value"
