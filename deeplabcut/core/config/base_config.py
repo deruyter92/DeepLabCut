@@ -212,8 +212,8 @@ class DLCBaseConfig(BaseModel):
             raise KeyError(key) from None
 
     def __setitem__(self, key: str, value: Any) -> None:
-        key = self._resolve_alias(key, warn=False)
-        if key not in self._field_names():
+        canonical = self._resolve_alias(key, warn=False)
+        if canonical not in self._field_names():
             raise KeyError(f"'{type(self).__name__}' has no field '{key}'")
         setattr(self, key, value)
 

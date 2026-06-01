@@ -276,11 +276,8 @@ class TrackedAliasConfig(DLCVersionedConfig):
 
 class TestAliasChangeTracking:
     def test_setitem_alias_marks_canonical_field_dirty(self):
-        import warnings
-
         cfg = TrackedAliasConfig()
-        with warnings.catch_warnings():
-            warnings.simplefilter("error", DLCDeprecationWarning)
+        with pytest.warns(DLCDeprecationWarning, match="projectPath"):
             cfg["projectPath"] = "/new"
         assert cfg.project_path == "/new"
         assert "project_path" in cfg.dirty_fields

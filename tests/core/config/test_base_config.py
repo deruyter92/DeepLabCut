@@ -189,14 +189,11 @@ class TestAliases:
         with pytest.warns(DLCDeprecationWarning, match="projectPath"):
             assert cfg["projectPath"] == "/p"
 
-    def test_setitem_alias_writes_canonical_without_double_warning(self):
-        """__setitem__ resolves the alias silently; setattr uses the canonical name."""
-        import warnings
-
+    def test_setitem_alias_warns_once_and_writes_canonical(self):
         cfg = ToyConfig()
-        with warnings.catch_warnings():
-            warnings.simplefilter("error", DLCDeprecationWarning)
+        with pytest.warns(DLCDeprecationWarning, match="projectPath") as record:
             cfg["projectPath"] = "/new"
+        assert len(record) == 1
         assert cfg.project_path == "/new"
 
     def test_setattr_alias_warns_and_validates(self):
