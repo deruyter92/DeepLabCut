@@ -100,7 +100,13 @@ def test_migrate_config_target_exceeds_current_raises(monkeypatch):
 
 @pytest.fixture(autouse=True)
 def _isolated_toy_migration(monkeypatch):
-    """Isolate each test from global migration registry changes."""
+    """Isolate each test from global migration registry changes.
+
+    NOTE: This module-level autouse fixture sets CURRENT_CONFIG_VERSION = _TOY_VERSION_NEW
+    for every test in this file, including TestVersionedConfigValidateAssignment at the
+    bottom. That class has its own autouse fixture that overrides it back to 0. Both run,
+    but the class fixture runs last and wins.
+    """
     monkeypatch.setattr(versioning, "_MIGRATIONS", versioning._MIGRATIONS.copy())
     monkeypatch.setattr(versioning, "CURRENT_CONFIG_VERSION", _TOY_VERSION_NEW)
 
@@ -818,6 +824,63 @@ class TestMigrationLogging:
         with caplog.at_level(logging.DEBUG, logger=_LOGGER_NAME):
             migrate_config(cfg, target_version=_V51)
         assert "Updated field 'a.b.c': 'old' -> 'new'" in caplog.text
+
+
+# -----------------------------------------------------------------------------
+# DLCVersionedConfig: from_yaml / to_yaml integration with migration
+# -----------------------------------------------------------------------------
+
+
+class _FileVersionedConfig(DLCVersionedConfig):
+    config_version: int = _TOY_VERSION_NEW
+    toy_new_field: str = ""
+    other: str = "default"
+
+
+class TestFromYamlMigration:
+    """from_yaml and to_yaml must interact correctly with the migration system."""
+
+    def test_from_yaml_with_old_version_runs_migration(self, tmp_path):
+        """A YAML file at an old config_version is migrated on load."""
+        path = tmp_path / "config.yaml"
+        path.write_text(f"config_version: {_TOY_VERSION_OLD}\n{_LEGACY_FIELD}: migrated_value\nother: kept\n")
+        cfg = _FileVersionedConfig.from_yaml(path)
+        assert cfg.toy_new_field == "migrated_value"
+        assert cfg.other == "kept"
+        assert cfg.config_version == _TOY_VERSION_NEW
+
+    def test_from_yaml_current_version_no_migration(self, tmp_path):
+        """A YAML file already at the current version loads without migration."""
+        path = tmp_path / "config.yaml"
+        path.write_text(f"config_version: {_TOY_VERSION_NEW}\ntoy_new_field: already_current\n")
+        cfg = _FileVersionedConfig.from_yaml(path)
+        assert cfg.toy_new_field == "already_current"
+
+    def test_to_yaml_persists_new_config_version(self, tmp_path):
+        """After migration, to_yaml writes the new config_version to disk."""
+        path = tmp_path / "config.yaml"
+        path.write_text(f"config_version: {_TOY_VERSION_OLD}\n{_LEGACY_FIELD}: value\n")
+        cfg = _FileVersionedConfig.from_yaml(path)
+        cfg.to_yaml(path)
+
+        from deeplabcut.core.config.utils import read_config_as_dict
+
+        saved = read_config_as_dict(path)
+        assert saved["config_version"] == _TOY_VERSION_NEW
+        assert "toy_new_field" in saved
+        assert _LEGACY_FIELD not in saved
+
+    def test_to_yaml_then_from_yaml_roundtrip(self, tmp_path):
+        """Writing a migrated config and reloading it should be a perfect no-op."""
+        path = tmp_path / "config.yaml"
+        path.write_text(f"config_version: {_TOY_VERSION_OLD}\n{_LEGACY_FIELD}: round_trip\nother: preserved\n")
+        cfg_first = _FileVersionedConfig.from_yaml(path)
+        cfg_first.to_yaml(path)
+        cfg_second = _FileVersionedConfig.from_yaml(path)
+        assert cfg_second.toy_new_field == "round_trip"
+        assert cfg_second.other == "preserved"
+        assert cfg_second.config_version == _TOY_VERSION_NEW
+        assert not cfg_second.is_dirty
 
 
 # -----------------------------------------------------------------------------

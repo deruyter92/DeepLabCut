@@ -211,6 +211,69 @@ class TestAliases:
         cfg = ToyConfig()
         assert "projectPath" in cfg
 
+    def test_keys_does_not_include_alias(self):
+        """keys() / iter() only yield canonical field names, never alias names."""
+        cfg = ToyConfig()
+        assert "projectPath" not in cfg.keys()
+        assert "projectPath" not in list(cfg)
+
+    def test_to_dict_uses_canonical_names_only(self):
+        """to_dict() always emits canonical field names, even when loaded via alias."""
+        with pytest.warns(DLCDeprecationWarning):
+            cfg = ToyConfig.model_validate({"Task": "t", "projectPath": "/alias"})
+        d = cfg.to_dict()
+        assert "project_path" in d
+        assert "projectPath" not in d
+
+    def test_from_yaml_with_alias_key_warns_and_loads(self, tmp_path):
+        """A YAML file that contains an alias key emits a warning on load."""
+        path = tmp_path / "config.yaml"
+        path.write_text("Task: t\nprojectPath: /from_yaml\n")
+        with pytest.warns(DLCDeprecationWarning, match="projectPath"):
+            cfg = ToyConfig.from_yaml(path)
+        assert cfg.project_path == "/from_yaml"
+
+    def test_to_yaml_then_from_yaml_no_alias_warning(self, tmp_path):
+        """After saving via to_yaml, reloading must not emit any alias warning
+        (the YAML file should contain canonical field names)."""
+        import warnings
+
+        path = tmp_path / "config.yaml"
+        cfg = ToyConfig(Task="t", project_path="/p")
+        cfg.to_yaml(path)
+
+        with warnings.catch_warnings():
+            warnings.simplefilter("error", DLCDeprecationWarning)
+            loaded = ToyConfig.from_yaml(path)
+        assert loaded.project_path == "/p"
+
+
+# ------------------------------------------------------------------
+# validate_assignment on DLCBaseConfig (not just versioned)
+# ------------------------------------------------------------------
+
+
+class TypedBase(DLCBaseConfig):
+    count: int = 0
+
+
+class TestBaseConfigValidateAssignment:
+    def test_invalid_assignment_raises(self):
+        cfg = TypedBase()
+        with pytest.raises(ValidationError):
+            cfg.count = "not-a-number"
+        assert cfg.count == 0
+
+    def test_valid_assignment_takes_effect(self):
+        cfg = TypedBase()
+        cfg.count = 7
+        assert cfg.count == 7
+
+    def test_coercion_applied(self):
+        cfg = TypedBase()
+        cfg.count = True  # coerced to 1
+        assert cfg.count == 1
+
 
 # ------------------------------------------------------------------
 # from_dict / from_any / from_yaml / to_dict / to_yaml
