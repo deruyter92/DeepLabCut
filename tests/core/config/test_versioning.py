@@ -697,13 +697,12 @@ class TestMigrationLogging:
         assert "Migrating config from version 53 to 50 (downgrade)" in caplog.text
         assert "Migration complete: config is now at version 50" in caplog.text
 
-    def test_same_version_logs_debug_no_migration(self, caplog, chain_migrations):
-        """When source == target, a DEBUG message is emitted and nothing else."""
+    def test_same_version_no_log(self, caplog, chain_migrations):
+        """When source == target, nothing is logged."""
         cfg = {"config_version": _V50}
         with caplog.at_level(logging.DEBUG, logger=_LOGGER_NAME):
             migrate_config(cfg, target_version=_V50)
-        assert "already at version 50" in caplog.text
-        assert "Migrating config" not in caplog.text
+        assert caplog.text == ""
 
     def test_debug_logs_field_rename(self, caplog, chain_migrations):
         """DEBUG logs report removed and added fields for a rename."""

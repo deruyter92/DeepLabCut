@@ -168,7 +168,6 @@ def migrate_config(config: dict, target_version: int = CURRENT_CONFIG_VERSION) -
     current_version = get_config_version(config)
 
     if current_version == target_version:
-        logger.debug("Config already at version %d, no migration needed", current_version)
         return config
 
     if target_version > CURRENT_CONFIG_VERSION:
