@@ -1,0 +1,1206 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Installing DeepLabCut &#8212; DeepLabCut</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+
+  
+  <link href="../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=eba8b062" />
+    <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css?v=9c3e77be" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../_static/mystnb.11b39860a7a0cbfd473a3ad8a317855267ff0bd372690045ca344a6b62be495e.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-thebe.css?v=4fa983c6" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=9e359f71" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+    <script src="../_static/documentation_options.js?v=9eb32ce0"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=f281be69"></script>
+    <script src="../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="../_static/togglebutton.js?v=b8b12719"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script async="async" src="../_static/sphinx-thebe.js?v=c100c467"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'docs/installation';</script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="DeepLabCut in Docker" href="docker.html" />
+    <link rel="prev" title="🥳 Get started with DeepLabCut: our key recommendations" href="UseOverviewGuide.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search this book..."
+         aria-label="Search this book..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../README.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../_static/logo.png" class="logo__image only-light" alt="DeepLabCut - Home"/>
+    <script>document.write(`<img src="../_static/logo.png" class="logo__image only-dark" alt="DeepLabCut - Home"/>`);</script>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        
+        <ul class="nav bd-sidenav bd-sidenav__home-link">
+            <li class="toctree-l1">
+                <a class="reference internal" href="../README.html">
+                    Welcome! 👋
+                </a>
+            </li>
+        </ul>
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Getting started</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="UseOverviewGuide.html">🥳 Get started with DeepLabCut: our key recommendations</a></li>
+<li class="toctree-l1 current active has-children"><a class="current reference internal" href="#">Installing DeepLabCut</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="docker.html">DeepLabCut in Docker</a></li>
+</ul>
+</details></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Main workflows overview</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="main-workflows/user-guide.html">DeepLabCut User Guide</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="quick-start/single_animal_quick_guide.html">Single-animal at a glance</a></li>
+<li class="toctree-l2"><a class="reference internal" href="quick-start/tutorial_maDLC.html">Multi-animal at a glance</a></li>
+<li class="toctree-l2"><a class="reference internal" href="main-workflows/multi-animal-tracking.html">Multi-animal tracking</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1"><a class="reference internal" href="Overviewof3D.html">3D DeepLabCut</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">GUI workflow</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="gui/PROJECT_GUI.html">Project Manager GUI</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="beginner-guides/beginners-guide.html">Setting up a new project</a></li>
+<li class="toctree-l2"><a class="reference internal" href="beginner-guides/manage-project.html">Editing and working with the configuration file</a></li>
+<li class="toctree-l2"><a class="reference internal" href="beginner-guides/labeling.html">Labeling GUI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="beginner-guides/Training-Evaluation.html">Neural network training and evaluation in the GUI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="beginner-guides/video-analysis.html">Video analysis in the GUI</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="gui/napari_GUI.html">napari GUI</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="gui/napari/basic_usage.html">Basic usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gui/napari/advanced_usage.html">Advanced features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gui/napari/tracking/basic_usage.html">Automated annotation with point tracking</a></li>
+</ul>
+</details></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Notebooks &amp; Demos</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="notebooks/your_data.html">Notebooks for your data</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../examples/COLAB/COLAB_YOURDATA_SuperAnimal.html">DeepLabCut Model Zoo: SuperAnimal models</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="../examples/COLAB/COLAB_YOURDATA_TrainNetwork_VideoAnalysis.html">DeepLabCut for your standard (single animal) projects!</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples/COLAB/COLAB_YOURDATA_maDLC_TrainNetwork_VideoAnalysis.html">DeepLabCut for your multi-animal projects!</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="notebooks/main_demos.html">Demo notebooks</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../examples/COLAB/COLAB_DEMO_SuperAnimal.html">DeepLabCut SuperAnimal models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples/COLAB/COLAB_DEMO_mouse_openfield.html">DeepLabCut on Single Mouse Data Demo</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples/COLAB/COLAB_3miceDemo.html">DeepLabCut MultiMouse Data Demo</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples/COLAB/COLAB_HumanPose_with_RTMPose.html">DeepLabCut RTMPose human pose estimation demo</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="notebooks/extra.html">Additional features notebooks</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../examples/COLAB/COLAB_transformer_reID.html">Demo: How to use our Pose Transformer for unsupervised identity tracking of animals</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="../examples/COLAB/COLAB_BUCTD_and_CTD_tracking.html">DeepLabCut - Tutorial for BUCTD models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples/JUPYTER/Demo_3D_DeepLabCut.html">3D DeepLabCut Toolbox</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples/COLAB/COLAB_DLC_ModelZoo.html">DeepLabCut Model Zoo user-contributed models</a></li>
+</ul>
+</details></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">DeepLabCut 3.0 - PyTorch guides</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="pytorch/index.html">PyTorch backend guides</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="pytorch/user_guide.html">What is new in DeepLabCut 3.0</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pytorch/pytorch_config.html">Configuration file reference</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pytorch/architectures.html">Model architectures</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pytorch/Benchmarking_shuffle_guide.html">Benchmarking user guide</a></li>
+</ul>
+</details></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Advanced, Performance &amp; Live</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="ModelZoo.html">The DeepLabCut Model Zoo!</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="recipes/UsingModelZooPupil.html">Using ModelZoo models on your own datasets</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1"><a class="reference internal" href="dlc-live/deeplabcutlive.html">Running DeepLabCut models in real-time</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="dlc-live/dlc-live-gui/index.html">DeepLabCut-live-GUI</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="dlc-live/dlc-live-gui/quickstart/install.html">Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dlc-live/dlc-live-gui/user_guide/overview.html">GUI overview</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="dlc-live/dlc-live-gui/user_guide/cameras_backends/camera_support.html">Camera support</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="dlc-live/dlc-live-gui/user_guide/cameras_backends/opencv_backend.html">OpenCV backend</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dlc-live/dlc-live-gui/user_guide/cameras_backends/basler_backend.html">Basler backend</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dlc-live/dlc-live-gui/user_guide/cameras_backends/aravis_backend.html">Aravis backend</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dlc-live/dlc-live-gui/user_guide/cameras_backends/gentl_backend.html">GenTL backend</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="dlc-live/dlc-live-gui/user_guide/misc/misc_landing.html">Additional resources</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="dlc-live/dlc-live-gui/user_guide/misc/modelzoo_downloads.html">Pre-trained models</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dlc-live/dlc-live-gui/user_guide/misc/timestamp_format.html">Video timestamp format</a></li>
+</ul>
+</details></li>
+</ul>
+</details></li>
+<li class="toctree-l1"><a class="reference internal" href="benchmark.html">DeepLabCut benchmark</a></li>
+<li class="toctree-l1"><a class="reference internal" href="recipes/TechHardware.html">Technical &amp; hardware considerations</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Development</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference external" href="https://deeplabcut.github.io/DeepLabCut/dev/">Developer Documentation</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Additional guides (Recipes)</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="recipes/index.html">The DeepLabCut Cookbook</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="recipes/publishing_notebooks_into_the_DLC_main_cookbook.html">Publishing Notebooks into the Main DLC Cookbook</a></li>
+<li class="toctree-l2"><a class="reference internal" href="HelperFunctions.html">Helper &amp; Advanced Optional Function Documentation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="convert_maDLC.html">How to convert a pre-2.2 project for use with DeepLabCut 2.2 or later</a></li>
+<li class="toctree-l2"><a class="reference internal" href="recipes/OtherData.html">How to use data labeled outside of DeepLabCut</a></li>
+<li class="toctree-l2"><a class="reference internal" href="recipes/io.html">Input/output manipulations with DeepLabCut</a></li>
+<li class="toctree-l2"><a class="reference internal" href="recipes/nn.html">Model training tips &amp; tricks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="recipes/post.html">Some data processing recipes!</a></li>
+<li class="toctree-l2"><a class="reference internal" href="recipes/BatchProcessing.html">Automate training and video analysis: Batch Processing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="recipes/DLCMethods.html">How to write a DLC Methods Section</a></li>
+<li class="toctree-l2"><a class="reference internal" href="recipes/ClusteringNapari.html">Clustering in the napari-DeepLabCut GUI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="recipes/OpenVINO.html">Intel OpenVINO backend</a></li>
+<li class="toctree-l2"><a class="reference internal" href="recipes/flip_and_rotate.html">Improving network performance on unbalanced data via augmentation 🦇</a></li>
+
+
+<li class="toctree-l2"><a class="reference internal" href="recipes/pose_cfg_file_breakdown.html">The <code class="docutils literal notranslate"><span class="pre">pose_cfg.yaml</span></code> Guideline Handbook</a></li>
+
+
+
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="dlc-utils/index.html">DeepLabCut-Utils - Community contributions</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="dlc-utils/XROMM/usage.html">XROMM + DeepLabCut local integration</a></li>
+</ul>
+</details></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Project &amp; Community</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="MISSION_AND_VALUES.html">Mission and Values of DeepLabCut</a></li>
+<li class="toctree-l1"><a class="reference internal" href="roadmap.html">A development roadmap for DeepLabCut</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Governance.html">Governance Model of DeepLabCut</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../CONTRIBUTING.html">Contributing to DeepLabCut</a></li>
+<li class="toctree-l1"><a class="reference internal" href="citation.html">How to Cite DeepLabCut</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-source-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Source repositories">
+    <i class="fab fa-github"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://github.com/DeepLabCut/DeepLabCut" target="_blank"
+   class="btn btn-sm btn-source-repository-button dropdown-item"
+   title="Source repository"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+<span class="btn__text-container">Repository</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/DeepLabCut/DeepLabCut/issues/new?title=Issue%20on%20page%20%2Fdocs/installation.html&body=Your%20issue%20content%20here." target="_blank"
+   class="btn btn-sm btn-source-issues-button dropdown-item"
+   title="Open an issue"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="btn__text-container">Open issue</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="../_sources/docs/installation.md" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.md</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
+  </button>
+`);
+</script>
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm pst-navbar-icon search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+<button class="sidebar-toggle secondary-toggle btn btn-sm" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</button>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>Installing DeepLabCut</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#using-conda">Using Conda</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#before-you-start">🚨 Before you start…</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#step-1-install-miniconda">Step 1: Install miniconda</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#step-2-build-a-conda-environment">Step 2: Build a conda environment</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#tensorflow-support">TensorFlow support</a></li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#step-3-let-s-run-deeplabcut">Step 3: Let’s run DeepLabCut!</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#conda-environment-management-tips">Conda environment management tips</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#other-ways-to-install-deeplabcut">Other ways to install DeepLabCut</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#git-clone">git clone</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#uv-recommended-for-developers"><code class="docutils literal notranslate"><span class="pre">uv</span></code> (recommended for developers)</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pip"><code class="docutils literal notranslate"><span class="pre">pip</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#docker">Docker</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#creating-your-own-conda-environment">Creating your own conda environment</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#updating-your-installation">Updating your installation</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#data-compatibility">Data compatibility</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#gpu-support">GPU Support</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#general-gpu-support">General GPU support</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#installing-cuda-and-cudnn-for-tensorflow-gpu-support">Installing CUDA and cuDNN for TensorFlow GPU support</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#notes">Notes</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#troubleshooting">Troubleshooting</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#tensorflow">TensorFlow</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#ffmpeg">FFMPEG</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#deeplabcut">DeepLabCut</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#system-wide-installation-considerations">System-wide installation considerations</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#hardware-considerations">Hardware considerations</a></li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section class="tex2jax_ignore mathjax_ignore" id="installing-deeplabcut">
+<span id="file-how-to-install"></span><h1>Installing DeepLabCut<a class="headerlink" href="#installing-deeplabcut" title="Link to this heading">#</a></h1>
+<ul class="simple">
+<li><p><strong>DeepLabCut can be run on Windows, Linux, or MacOS as long as you have Python 3.10-3.12 installed</strong></p>
+<ul>
+<li><p>See also <a class="reference internal" href="#sec-hardware-considerations-during-install"><span class="std std-ref">technical considerations</span></a>.</p></li>
+</ul>
+</li>
+</ul>
+<!-- and if you run into issues also check out the [installation tips](https://deeplabcut.github.io/DeepLabCut/docs/recipes/installTips.html). -->
+<!-- Tips page is outdated -->
+<ul class="simple">
+<li><p>🚧 Please note, there are several possibilities for installation:</p>
+<ul>
+<li><p><strong>Recommended for most users</strong>: Install in a <a class="reference internal" href="#sec-installation-using-conda"><span class="std std-ref">conda environment</span></a></p></li>
+<li><p>Install with <strong><a class="reference internal" href="#sec-uv-install"><span class="std std-ref">uv</span></a></strong> (recommended for developers)</p></li>
+<li><p>In the supplied <strong><a class="reference internal" href="docker.html#docker-containers"><span class="std std-ref">Docker container</span></a></strong> (recommended for Ubuntu advanced users and reproducibility).</p></li>
+</ul>
+</li>
+<li><p>🚀 You will get the best performance when using a <strong>GPU</strong>!</p>
+<ul>
+<li><p>Please see the section on <a class="reference internal" href="#sec-install-gpu-support"><span class="std std-ref">GPU support</span></a> to install your GPU driver and CUDA.</p></li>
+</ul>
+</li>
+</ul>
+<div class="admonition hint">
+<p class="admonition-title">Hint</p>
+<p>Familiar with python packages and conda?</p>
+<p>This assumes you have <code class="docutils literal notranslate"><span class="pre">conda</span></code>/<code class="docutils literal notranslate"><span class="pre">mamba</span></code> installed and this will install DeepLabCut in a fresh
+environment.
+If you have an NVIDIA GPU, install PyTorch according to <a class="reference external" href="https://pytorch.org/get-started/locally/">their instructions</a> (with your desired CUDA version) - you just need your GPU drivers installed.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda<span class="w"> </span>create<span class="w"> </span>-n<span class="w"> </span>DEEPLABCUT<span class="w"> </span><span class="nv">python</span><span class="o">=</span><span class="m">3</span>.12
+conda<span class="w"> </span>activate<span class="w"> </span>DEEPLABCUT
+
+<span class="c1"># Install PyTorch with your desired CUDA version (or CPU only)</span>
+<span class="c1"># Example: install GPU-enabled pytorch for CUDA 12.6</span>
+pip<span class="w"> </span>install<span class="w"> </span>torch<span class="w"> </span>torchvision<span class="w"> </span>--index-url<span class="w"> </span>https://download.pytorch.org/whl/cu126
+
+<span class="c1"># install the latest version of DeepLabCut</span>
+pip<span class="w"> </span>install<span class="w"> </span>deeplabcut<span class="w"> </span><span class="c1"># add --pre for pre-release versions!</span>
+<span class="c1"># or if you want to use the GUI</span>
+pip<span class="w"> </span>install<span class="w"> </span>deeplabcut<span class="o">[</span>gui<span class="o">]</span>
+
+<span class="c1"># ONLY IF YOU HAVE A CUDA GPU - check that PyTorch can access your GPU; this</span>
+<span class="c1"># should print `True`</span>
+python<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;import torch; print(torch.cuda.is_available())&quot;</span>
+</pre></div>
+</div>
+</div>
+<ul class="simple">
+<li><p>If you’re familiar with the command line and want TensorFlow support, look <a class="reference internal" href="#sec-deeplabcut-with-tf-install"><span class="std std-ref">below</span></a>.</p></li>
+</ul>
+<section id="using-conda">
+<span id="sec-installation-using-conda"></span><h2>Using Conda<a class="headerlink" href="#using-conda" title="Link to this heading">#</a></h2>
+<img src="https://images.squarespace-cdn.com/content/v1/57f6d51c9f74566f55ecf271/71e5d954-75a0-4534-9fa6-7ecc4bf1b76d/installDLC.png?format=1500w" width="250" title="DLC" alt="DLC" align="right" />
+<p><strong>The installation process is as easy as the figure on the right!↘️</strong></p>
+<section id="before-you-start">
+<h3>🚨 Before you start…<a class="headerlink" href="#before-you-start" title="Link to this heading">#</a></h3>
+<p>Do you have a GPU? If yes, see the <a class="reference internal" href="#sec-install-gpu-support"><span class="std std-ref">GPU support section</span></a> below for installation instructions.</p>
+<p>If not, you can still install DeepLabCut and use it on your CPU, but it will be much slower for training and evaluation (but not for labeling or project management).</p>
+<div class="dropdown admonition">
+<p class="admonition-title">🚨 Hardware information!</p>
+<ul>
+<li><p>We recommend having a GPU if possible!</p></li>
+<li><p>You <strong>need to decide if you want to use a CPU or GPU for your models</strong></p>
+<div class="sd-tab-set docutils">
+<input checked="checked" id="sd-tab-item-0" name="sd-tab-set-0" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-0">
+CPU</label><div class="sd-tab-content docutils">
+<p>Great, jump to the next section below!</p>
+</div>
+<input id="sd-tab-item-1" name="sd-tab-set-0" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-1">
+NVIDIA GPU</label><div class="sd-tab-content docutils">
+<p>If you want to use your own GPU (i.e., a GPU is in your workstation), then you need to be sure you have a CUDA compatible GPU, CUDA, and cuDNN installed.
+Please note, which CUDA you install depends on what version of PyTorch you want to use. So, please check <a class="reference internal" href="#sec-install-gpu-support"><span class="std std-ref">GPU Support</span></a> below carefully. <strong>Note, DeepLabCut is up to date with the latest CUDA and PyTorch!</strong></p>
+</div>
+<input id="sd-tab-item-2" name="sd-tab-set-0" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-2">
+Apple M-chip GPU</label><div class="sd-tab-content docutils">
+<p>Install miniconda and use the standard <code class="docutils literal notranslate"><span class="pre">DEEPLABCUT.yaml</span></code> conda environment — PyTorch will use your Apple GPU via Metal automatically. For TensorFlow, add the <code class="docutils literal notranslate"><span class="pre">tf</span></code> extra after install (see <a class="reference internal" href="#sec-deeplabcut-with-tf-install"><span class="std std-ref">TensorFlow Support</span></a>). More tips are on the <span class="xref std std-ref">installation tips</span> page.</p>
+</div>
+</div>
+</li>
+<li><p>Note, you can also use the CPU-only install for project management and labeling the data!
+Then, for example, use Google Colaboratory GPUs for free (read more <a class="reference external" href="https://github.com/DeepLabCut/DeepLabCut/tree/master/examples#demo-4-deeplabcut-training-and-analysis-on-google-colaboratory-with-googles-gpus">here</a> and there are a lot of helper videos on <a class="reference external" href="https://www.youtube.com/playlist?list=PLjpMSEOb9vRFwwgIkLLN1NmJxFprkO_zi">our YouTube channel!</a>).</p></li>
+</ul>
+</div>
+</section>
+<section id="step-1-install-miniconda">
+<h3>Step 1: Install miniconda<a class="headerlink" href="#step-1-install-miniconda" title="Link to this heading">#</a></h3>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>Download <a class="reference external" href="https://www.anaconda.com/docs/getting-started/miniconda/main">miniconda</a> for your operating system</p>
+</div>
+<ul class="simple">
+<li><p>miniconda is an easy way to install Python and additional packages across various operating systems</p></li>
+<li><p>With miniconda, you can install all the dependencies in an <a class="reference external" href="https://conda.io/docs/user-guide/tasks/manage-environments.html">environment</a> on your machine</p></li>
+<li><p>Miniconda is a lightweight version of Anaconda that includes only conda and its dependencies.</p></li>
+</ul>
+<div class="dropdown tip admonition">
+<p class="admonition-title">Wait, why are we mixing Anaconda, miniconda and conda?</p>
+<p><code class="docutils literal notranslate"><span class="pre">conda</span></code> is the terminal-based environment management system that is included in both Anaconda and Miniconda. This is the actual workhorse that allows you to create and manage environments, and install packages.</p>
+<p><strong>Anaconda</strong> is a full-featured distribution that includes conda, Python, and a large number of scientific packages and their dependencies, plus some graphical user interfaces (GUIs) for managing environments and packages. It is a larger download and takes up more disk space.</p>
+<p><strong>Miniconda</strong> is a minimal distribution that includes only conda and its dependencies, along with Python. It does not include any additional packages or GUIs. We recommend it as most GUIs and base packages provided by the full Anaconda distribution are not necessary for DeepLabCut.</p>
+</div>
+</section>
+<section id="step-2-build-a-conda-environment">
+<span id="sec-conda-build-env"></span><h3>Step 2: Build a conda environment<a class="headerlink" href="#step-2-build-a-conda-environment" title="Link to this heading">#</a></h3>
+<p>Use the <code class="docutils literal notranslate"><span class="pre">DEEPLABCUT.yaml</span></code> file to build a conda environment with all the dependencies for DeepLabCut.</p>
+<p>You simply need to have this <code class="docutils literal notranslate"><span class="pre">.yaml</span></code> file locally on your computer.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>On <strong>Windows</strong>, make sure you have <code class="docutils literal notranslate"><span class="pre">git</span></code> installed: <a class="reference external" href="https://gitforwindows.org/">Git for Windows</a></p>
+</div>
+<ul>
+<li><p>Follow the link ➡️ for the <a class="reference external" href="https://github.com/DeepLabCut/DeepLabCut/blob/main/conda-environments/DEEPLABCUT.yaml#:~:text=Raw%20file%20content-,Download,-%E2%8C%98">conda file</a> and then click “…” and select Download</p>
+<img width="274" alt="Screen Shot 2023-09-13 at 10 33 32 PM" src="https://github.com/DeepLabCut/DeepLabCut/assets/28102185/ec4295a5-e85c-4ce7-8c16-e6517a2cfa22">
+</li>
+<li><p><strong>Now, in Terminal (or Anaconda Command Prompt for Windows users)</strong>:</p>
+<ul>
+<li><p>If you clicked to download, go to your downloads folder.</p></li>
+<li><p>Be sure you are in the folder that has the <code class="docutils literal notranslate"><span class="pre">.yaml</span></code> file, then run:</p>
+<p><code class="docutils literal notranslate"><span class="pre">conda</span> <span class="pre">env</span> <span class="pre">create</span> <span class="pre">-f</span> <span class="pre">DEEPLABCUT.yaml</span></code></p>
+</li>
+</ul>
+</li>
+<li><p>You can now use this environment from anywhere on your computer.
+Just activate your environment by running: <code class="docutils literal notranslate"><span class="pre">conda</span> <span class="pre">activate</span> <span class="pre">DEEPLABCUT</span></code></p></li>
+</ul>
+<p>Now you should see (<code class="docutils literal notranslate"><span class="pre">DEEPLABCUT</span></code>) on the left of your terminal screen:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="n">DEEPLABCUT</span><span class="p">)</span> <span class="n">YourName</span><span class="o">-</span><span class="n">MacBook</span><span class="o">...</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>No need to run <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">deeplabcut</span></code>, it’s already in the conda file!</p>
+</div>
+<section id="tensorflow-support">
+<span id="sec-deeplabcut-with-tf-install"></span><h4>TensorFlow support<a class="headerlink" href="#tensorflow-support" title="Link to this heading">#</a></h4>
+<div class="dropdown admonition">
+<p class="admonition-title">DeepLabCut TensorFlow Support</p>
+<p>💡 <strong>PyTorch and TensorFlow Support within DeepLabCut</strong></p>
+<p>As of June 2024 we have a PyTorch Engine backend and we will be deprecating the
+TensorFlow backend by version 3.2 latest (TBD).
+Currently, if you want to use TensorFlow, you
+need to run <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">deeplabcut[tf]</span></code> in order to install the correct version of
+TensorFlow in your conda env. Please note, we will be providing bug fixes, but we will
+not be supporting new TensorFlow versions beyond version 2.18.</p>
+<p>Installing TensorFlow manually and getting it to have access to the GPU can be a bit tricky.
+However, we try to simplify the installation procedure via optional dependencies.</p>
+<p>A specific note for <strong>Windows users</strong>: TensorFlow’s own docs state that <strong>native Windows GPU</strong> support
+ended after <strong>2.10</strong>. We recommend Windows users to install <a class="reference external" href="https://learn.microsoft.com/en-us/windows/wsl/install">The Windows Subsystem for Linux (WSL)</a>
+if they want GPU support.</p>
+<p><strong>Installation via the <code class="docutils literal notranslate"><span class="pre">tf</span></code> optional dependencies</strong>
+We recommend installing DeepLabCut with TensorFlow by specifying one of the ‘extra’s’: <code class="docutils literal notranslate"><span class="pre">tf</span></code>, <code class="docutils literal notranslate"><span class="pre">tf-cu11</span></code> or <code class="docutils literal notranslate"><span class="pre">tf-cu12</span></code>. E.g,</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">deeplabcut</span><span class="p">[</span><span class="n">tf</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>This table provides a more detailed summary on the available extras:</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Extra</p></th>
+<th class="head"><p>Version</p></th>
+<th class="head"><p>Python</p></th>
+<th class="head"><p>GPU backend</p></th>
+<th class="head"><p>Role (summary)</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>tf</p></td>
+<td><p>2.12–2.18 (Python-dependent)</p></td>
+<td><p>3.10-3.12</p></td>
+<td><p>CUDA (Linux); Metal (macOS)</p></td>
+<td><p>Default TensorFlow stack for most users.</p></td>
+</tr>
+<tr class="row-odd"><td><p>tf-cu11</p></td>
+<td><p>2.14</p></td>
+<td><p>3.10 / 3.11</p></td>
+<td><p>CUDA 11.8</p></td>
+<td><p>Pinned TF for CUDA 11.x-era stack</p></td>
+</tr>
+<tr class="row-even"><td><p>tf-cu12</p></td>
+<td><p>2.18</p></td>
+<td><p>3.10-3.12</p></td>
+<td><p>CUDA 12.5</p></td>
+<td><p>Pinned TF for CUDA 12.x-era stack</p></td>
+</tr>
+<tr class="row-odd"><td><p>tf-latest</p></td>
+<td><p>2.18+</p></td>
+<td><p>3.10-3.12</p></td>
+<td><p>CUDA 12.5+</p></td>
+<td><p>(Not recommended!) Newest TensorFlow ≥ 2.18</p></td>
+</tr>
+<tr class="row-even"><td><p>apple_mchips</p></td>
+<td><p>2.12 - 2.18</p></td>
+<td><p>3.10-3.12</p></td>
+<td><p>macOS Metal</p></td>
+<td><p>(Not recommended!) Legacy extra; installs <code class="docutils literal notranslate"><span class="pre">tensorflow</span></code> + <code class="docutils literal notranslate"><span class="pre">tensorflow-metal</span></code>. Prefer <code class="docutils literal notranslate"><span class="pre">tf</span></code> instead.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Note that TensorFlow and PyTorch may try to install competing CUDA-toolkit dependencies.
+This is addressed in the listed extras by capping the PyTorch version to match the CUDA requirements.
+In case you experience problems with the above installation, you can try to let TensorFlow install their own CUDA-toolkit libraries.
+Please run the following installation command (in Linux), replacing <tf-version> with your TensorFlow version (see table above).
+Note that this may break PyTorch functionality.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="s2">&quot;tensorflow[and-cuda]==&lt;tf-version&gt;&quot;</span>
+</pre></div>
+</div>
+<p><strong>Advanced manual setup (Linux):</strong>
+if you do <strong>not</strong> use <code class="docutils literal notranslate"><span class="pre">deeplabcut[tf]</span></code>, you must align the following dependencies yourself:
+<code class="docutils literal notranslate"><span class="pre">tensorflow</span></code>, <code class="docutils literal notranslate"><span class="pre">tensorpack</span></code>, <code class="docutils literal notranslate"><span class="pre">tf-keras</span></code> / Keras, <code class="docutils literal notranslate"><span class="pre">tf-slim</span></code>, CUDA, the NVIDIA <strong>driver</strong>,
+and <strong>PyTorch</strong> yourself.</p>
+<p>Check TensorFlow’s <a class="reference external" href="https://www.tensorflow.org/install/source#gpu">compatibility matrix</a>
+to know which version of CUDA and cuDNN you should install.</p>
+<p>We have found that installing DeepLabCut with the following commands works well for
+Linux users to install PyTorch 2.3.1, TensorFlow 2.12, CUDA 11.8 and cuDNN 8 in a Conda
+environment:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda<span class="w"> </span>create<span class="w"> </span>-n<span class="w"> </span>deeplabcut-with-tf<span class="w"> </span><span class="s2">&quot;python=3.10&quot;</span>
+conda<span class="w"> </span>activate<span class="w"> </span>deeplabcut-with-tf
+
+<span class="c1"># Install the desired TensorFlow version, built for CUDA 11.8 and cuDNN 8</span>
+pip<span class="w"> </span>install<span class="w"> </span><span class="s2">&quot;tensorflow==2.12&quot;</span><span class="w"> </span><span class="s2">&quot;tensorpack&gt;=0.11&quot;</span><span class="w"> </span><span class="s2">&quot;tf_slim&gt;=1.1.0&quot;</span>
+
+<span class="c1"># Install PyTorch with a version using CUDA 11.8 and cuDNN 8</span>
+pip<span class="w"> </span>install<span class="w"> </span><span class="s2">&quot;torch==2.3.1&quot;</span><span class="w"> </span>torchvision<span class="w"> </span>--index-url<span class="w"> </span>https://download.pytorch.org/whl/cu118
+
+<span class="c1"># Create symbolic links to NVIDIA shared libraries for TensorFlow</span>
+<span class="c1">#   -&gt; as described in their installation docs:</span>
+<span class="c1">#      https://www.tensorflow.org/install/pip#step-by-step_instructions</span>
+
+<span class="nb">pushd</span><span class="w"> </span><span class="k">$(</span>dirname<span class="w"> </span><span class="k">$(</span>python<span class="w"> </span>-c<span class="w"> </span><span class="s1">&#39;print(__import__(&quot;tensorflow&quot;).__file__)&#39;</span><span class="k">))</span>
+ln<span class="w"> </span>-svf<span class="w"> </span>../nvidia/*/lib/*.so*<span class="w"> </span>.
+<span class="nb">popd</span>
+
+pip<span class="w"> </span>install<span class="w">  </span>--pre<span class="w"> </span>deeplabcut
+</pre></div>
+</div>
+</div>
+</section>
+</section>
+<section id="step-3-let-s-run-deeplabcut">
+<h3>Step 3: Let’s run DeepLabCut!<a class="headerlink" href="#step-3-let-s-run-deeplabcut" title="Link to this heading">#</a></h3>
+<p><strong>DeepLabCut is installed!</strong> 🎉💜</p>
+<p>Launch the DeepLabCut GUI in your new conda env by running <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">-m</span> <span class="pre">deeplabcut</span></code></p>
+<p>Head over to the <a class="reference external" href="https://deeplabcut.github.io/DeepLabCut/docs/UseOverviewGuide.html">User Guide Overview</a> for information.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>On <strong>Windows</strong>: Open the terminal/cmd/anaconda prompt as <strong>Administrator</strong> (right click and select “Run as administrator”) to avoid permission issues when downloading models, and for symlink support when videos are not copied into the project folder.</p>
+</div>
+</section>
+<section id="conda-environment-management-tips">
+<h3>Conda environment management tips<a class="headerlink" href="#conda-environment-management-tips" title="Link to this heading">#</a></h3>
+<p>Here are some conda environment management tips: <a class="reference external" href="https://kapeli.com/cheat_sheets/Conda.docset/Contents/Resources/Documents/index">kapeli.com: Conda Cheat Sheet</a></p>
+<!-- git clone section below should be the place for editable install -->
+<!-- **Pro Tip:** If you want to modify code and then test it, you can use our provided
+test scripts. This would mean you need to be up-to-date with the latest GitHub-based code
+though!  -->
+<p>Please see how to test your installation by following <a class="reference external" href="https://www.youtube.com/watch?v=IOWtKn3l33s">this video</a>.</p>
+<!-- {ref}`here <installation-tips>` on how to get the latest GitHub code, and -->
+</section>
+</section>
+<section id="other-ways-to-install-deeplabcut">
+<h2>Other ways to install DeepLabCut<a class="headerlink" href="#other-ways-to-install-deeplabcut" title="Link to this heading">#</a></h2>
+<section id="git-clone">
+<h3>git clone<a class="headerlink" href="#git-clone" title="Link to this heading">#</a></h3>
+<p>Recommended for users who want to modify the code, or want to be up-to-date with the latest code on GitHub.</p>
+<ul class="simple">
+<li><p>To clone the repository run: <code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">clone</span> <span class="pre">https://github.com/DeepLabCut/DeepLabCut.git</span></code></p></li>
+<li><p>Then follow the same steps as in Step 2 above, adjusting for the <code class="docutils literal notranslate"><span class="pre">DEEPLABCUT.yaml</span></code> env file now being in the folder where you git cloned the repo.</p></li>
+<li><p>Or use pip/uv to install from the cloned repo (see below).</p></li>
+</ul>
+</section>
+<section id="uv-recommended-for-developers">
+<span id="sec-uv-install"></span><h3><code class="docutils literal notranslate"><span class="pre">uv</span></code> (recommended for developers)<a class="headerlink" href="#uv-recommended-for-developers" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>Clone the <a class="reference external" href="https://github.com/DeepLabCut/DeepLabCut">repository</a></p></li>
+<li><p>Install <code class="docutils literal notranslate"><span class="pre">uv</span></code> following <a class="reference external" href="https://docs.astral.sh/uv/getting-started/installation/">instructions here</a></p></li>
+<li><p>Run in the cloned repo:</p></li>
+</ul>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>uv<span class="w"> </span>venv<span class="w"> </span>-p<span class="w"> </span><span class="m">3</span>.12
+uv<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span><span class="s1">&#39;.[gui]&#39;</span><span class="w"> </span><span class="c1"># Change optional installs as needed</span>
+<span class="nb">source</span><span class="w"> </span>.venv/bin/activate<span class="w"> </span><span class="c1"># or &amp; .venv\Scripts\activate.ps1 on Windows</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>Add <strong><code class="docutils literal notranslate"><span class="pre">modelzoo</span></code></strong> for SuperAnimal models: <code class="docutils literal notranslate"><span class="pre">uv</span> <span class="pre">pip</span> <span class="pre">install</span> <span class="pre">-e</span> <span class="pre">'.[gui,modelzoo]'</span></code>.</p></li>
+<li><p>Add <strong><code class="docutils literal notranslate"><span class="pre">tf</span></code></strong> (or <code class="docutils literal notranslate"><span class="pre">tf-cu11</span></code> / <code class="docutils literal notranslate"><span class="pre">tf-cu12</span></code> as appropriate) for the TensorFlow training engine — see <a class="reference internal" href="#sec-deeplabcut-with-tf-install"><span class="std std-ref">TensorFlow Support</span></a>.</p></li>
+</ul>
+</section>
+<section id="pip">
+<h3><code class="docutils literal notranslate"><span class="pre">pip</span></code><a class="headerlink" href="#pip" title="Link to this heading">#</a></h3>
+<p>If you already have a local environment, everything you need to use the project manager GUI, train and/or build custom models within DeepLabCut (i.e., use our source code and our dependencies) can be installed with <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">'deeplabcut[gui]'</span></code> (for GUI support w/PyTorch) or without the gui: <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">'deeplabcut'</span></code>.</p>
+<ul class="simple">
+<li><p>If you <strong>cloned the repo</strong> and want to make edits to the code locally, navigate to the cloned repo folder and run <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">-e</span> <span class="pre">.[gui]</span></code> to install the package in “editable” mode, which allows you to make changes to the code and have those changes reflected when you import the package.</p></li>
+<li><p>If you want to use the SuperAnimal models, then please use <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">'deeplabcut[gui,modelzoo]'</span></code>.</p></li>
+<li><p>If you need the <strong>TensorFlow</strong> training engine, add the <strong><code class="docutils literal notranslate"><span class="pre">tf</span></code></strong> extra (or <code class="docutils literal notranslate"><span class="pre">tf-cu11</span></code> / <code class="docutils literal notranslate"><span class="pre">tf-cu12</span></code> as appropriate): <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">'deeplabcut[tf]'</span></code> — see <a class="reference internal" href="#sec-deeplabcut-with-tf-install"><span class="std std-ref">TensorFlow Support</span></a>.</p></li>
+</ul>
+</section>
+<section id="docker">
+<h3>Docker<a class="headerlink" href="#docker" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>We also have docker containers. Docker is the most reproducible way to use and deploy code. Please see our dedicated docker package and page <a class="reference external" href="https://deeplabcut.github.io/DeepLabCut/docs/docker.html">here</a>.</p></li>
+</ul>
+</section>
+<section id="creating-your-own-conda-environment">
+<h3>Creating your own conda environment<a class="headerlink" href="#creating-your-own-conda-environment" title="Link to this heading">#</a></h3>
+<!-- Why recommend this over a clean conda/mambe install ? -->
+<!-- This is the recommended route for Linux: Ubuntu, CentOS, Mint, etc -->
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>In a fresh ubuntu install, you will often have to run: <code class="docutils literal notranslate"><span class="pre">sudo</span> <span class="pre">apt-get</span> <span class="pre">install</span> <span class="pre">gcc</span> <span class="pre">python3-dev</span></code> to install the GNU Compiler Collection and the python developing environment.</p>
+</div>
+<p>Create a new conda environment with Python 3.10 (or 3.11, 3.12) by running:</p>
+<p><code class="docutils literal notranslate"><span class="pre">conda</span> <span class="pre">create</span> <span class="pre">-n</span> <span class="pre">DLC</span> <span class="pre">python=3.10</span></code></p>
+<p><strong>Current version:</strong> The only thing you then need to add to the env is deeplabcut (
+<code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">deeplabcut</span></code>) or <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">'deeplabcut[gui]'</span></code> if you are using the GUI, which includes the napari based labeling
+interface.</p>
+</section>
+</section>
+<section id="updating-your-installation">
+<h2>Updating your installation<a class="headerlink" href="#updating-your-installation" title="Link to this heading">#</a></h2>
+<p>If you ever want to update your DLC, just run <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">--upgrade</span> <span class="pre">deeplabcut</span></code> (alongside optional needed requirements, e.g. <code class="docutils literal notranslate"><span class="pre">[gui]</span></code>) using your environment.</p>
+<p>If you would like to use a specific release, then specify the version you want, such as <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">deeplabcut==3.0</span></code> and optional requirements.</p>
+<p>Once installed, you can
+check the version by running:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">deeplabcut</span>
+<span class="n">deeplabcut</span><span class="o">.</span><span class="n">__version__</span>
+</pre></div>
+</div>
+<p>Don’t be afraid to update, DLC is backwards compatible with your 2.0+ projects and performance continues to get better and new features are added often.</p>
+<section id="data-compatibility">
+<h3>Data compatibility<a class="headerlink" href="#data-compatibility" title="Link to this heading">#</a></h3>
+<p><strong>All of the data you labelled in version 2.X is also compatible with version 3+ and the
+PyTorch engine</strong>!
+There is no change in the workflow or the way labels are handled: the
+big changes happen under-the-hood! If you’ve been working with DeepLabCut 2.X and want
+to learn more about moving to the PyTorch engine, check out our docs on <a class="reference internal" href="pytorch/user_guide.html#dlc3-user-guide"><span class="std std-ref">moving from
+TensorFlow to PyTorch</span></a></p>
+</section>
+</section>
+<section id="gpu-support">
+<span id="sec-install-gpu-support"></span><h2>GPU Support<a class="headerlink" href="#gpu-support" title="Link to this heading">#</a></h2>
+<section id="general-gpu-support">
+<h3>General GPU support<a class="headerlink" href="#general-gpu-support" title="Link to this heading">#</a></h3>
+<p>Please ensure you have an NVIDIA GPU and the matching NVIDIA driver installed.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>If you have a GPU, you should first <strong>install an appropriate driver for
+your specific GPU</strong>, then you can use the supplied conda file.</p>
+</div>
+<ul class="simple">
+<li><p>Drivers: see <a class="reference external" href="https://www.nvidia.com/Download/index.aspx">NVIDIA Drivers</a></p></li>
+<li><p>CUDA: download <a class="reference external" href="https://developer.nvidia.com/cuda-downloads">here</a> if needed. Installing the drivers usually allows you to skip installing CUDA; instead obtaining via the PyTorch installation process.</p></li>
+</ul>
+</section>
+<section id="installing-cuda-and-cudnn-for-tensorflow-gpu-support">
+<h3>Installing CUDA and cuDNN for TensorFlow GPU support<a class="headerlink" href="#installing-cuda-and-cudnn-for-tensorflow-gpu-support" title="Link to this heading">#</a></h3>
+<p>You will need an NVIDIA GPU that is compatible with CUDA.</p>
+<p>To see a list of CUDA-enabled NVIDIA GPUs, please <a class="reference external" href="https://developer.nvidia.com/cuda-gpus">see their website</a>.</p>
+<p>Here we provide notes on how to install and check your GPU use with TensorFlow, which is used by DeepLabCut.</p>
+<ol class="arabic simple">
+<li><p>Install a driver for your GPU, using the NVIDIA Drivers link above.</p>
+<ul class="simple">
+<li><p>Check which driver is installed by typing this into the terminal: <code class="docutils literal notranslate"><span class="pre">nvidia-smi</span></code>.</p></li>
+</ul>
+</li>
+<li><p>Install <a class="reference external" href="https://developer.nvidia.com/">CUDA</a>. Note that <a class="reference external" href="https://developer.nvidia.com/cudnn">cuDNN</a> is supplied inside the anaconda environment files, so you don’t need to install it again.</p></li>
+<li><p>Follow the steps above to get the <code class="docutils literal notranslate"><span class="pre">DEEPLABCUT</span></code> conda file and install it!</p></li>
+</ol>
+</section>
+<section id="notes">
+<h3>Notes<a class="headerlink" href="#notes" title="Link to this heading">#</a></h3>
+<ul>
+<li><p><strong>As of version 3.0+ the default engine is PyTorch.</strong> TensorFlow remains optional via
+<code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">&quot;deeplabcut[tf]&quot;</span></code> and related extras; <strong>version ranges are defined in
+<code class="docutils literal notranslate"><span class="pre">pyproject.toml</span></code></strong> (typically TensorFlow <strong>2.12+</strong> on supported Python versions). Upstream, <strong>native
+Windows GPU</strong> for TensorFlow stopped after <strong>2.10</strong>. We advise Windows users to install <a class="reference external" href="https://learn.microsoft.com/en-us/windows/wsl/install">WSL</a>. We do not guarantee every future TensorFlow release for all platforms.</p></li>
+<li><p>Please be mindful different versions of TensorFlow require different CUDA versions.</p></li>
+<li><p>As the combination of TensorFlow and CUDA matters, we strongly encourage you to
+<strong>check your driver/cuDNN/CUDA/TensorFlow versions</strong> <a class="reference external" href="https://stackoverflow.com/questions/30820513/what-is-version-of-cuda-for-nvidia-304-125/30820690#30820690">on this StackOverflow post</a>.</p></li>
+<li><p>To check your GPU is working, in the terminal, run:</p>
+<p><code class="docutils literal notranslate"><span class="pre">nvcc</span> <span class="pre">-V</span></code> to check your installed version(s).</p>
+</li>
+<li><p>The best practice is to then run the supplied <code class="docutils literal notranslate"><span class="pre">testscript_pytorch_single_animal.py</span></code>
+(or <code class="docutils literal notranslate"><span class="pre">testscript_tensorflow_single_animal.py</span></code> for the TensorFlow engine); this is inside the examples folder you
+acquired when you git cloned the repo. Here is more information/a short
+<a class="reference external" href="https://www.youtube.com/watch?v=IOWtKn3l33s">video on running the test scripts</a>.</p></li>
+<li><p>You can test that your GPU is being properly used with these additional <a class="reference external" href="https://www.tensorflow.org/programmers_guide/using_gpu">tips</a>.</p></li>
+<li><p>Ubuntu users might find this <a class="reference external" href="https://deeplabcut.github.io/DeepLabCut/docs/recipes/installTips.html#installation-on-ubuntu-20-04-lts">installation guide</a> for a fresh DLC install on Ubuntu useful as well.</p></li>
+</ul>
+</section>
+</section>
+<section id="troubleshooting">
+<h2>Troubleshooting<a class="headerlink" href="#troubleshooting" title="Link to this heading">#</a></h2>
+<section id="tensorflow">
+<h3>TensorFlow<a class="headerlink" href="#tensorflow" title="Link to this heading">#</a></h3>
+<p>Here are some additional resources users have found helpful (posted without endorsement):</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://stackoverflow.com/questions/30820513/what-is-the-correct-version-of-cuda-for-my-nvidia-driver/30820690">https://stackoverflow.com/questions/30820513/what-is-the-correct-version-of-cuda-for-my-nvidia-driver/30820690</a></p></li>
+</ul>
+<p align="center">
+  <img src="https://static1.squarespace.com/static/57f6d51c9f74566f55ecf271/t/5c3e46ca1ae6cfbb5c5d1ee0/1547585235033/cuda_driver.png?format=750w" width="50%">
+</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://www.tensorflow.org/install/source#gpu">https://www.tensorflow.org/install/source#gpu</a></p></li>
+<li><p><a class="reference external" href="http://blog.nitishmutha.com/tensorflow/2017/01/22/TensorFlow-with-gpu-for-windows.html">http://blog.nitishmutha.com/tensorflow/2017/01/22/TensorFlow-with-gpu-for-windows.html</a></p></li>
+<li><p><a class="reference external" href="https://developer.nvidia.com/cuda-toolkit-archive">https://developer.nvidia.com/cuda-toolkit-archive</a></p></li>
+</ul>
+</section>
+<section id="ffmpeg">
+<h3>FFMPEG<a class="headerlink" href="#ffmpeg" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>A few Windows users report needing to install re-install ffmpeg (after windows updates) as described here: <a class="reference external" href="https://video.stackexchange.com/questions/20495/how-do-i-set-up-and-use-ffmpeg-in-windows">https://video.stackexchange.com/questions/20495/how-do-i-set-up-and-use-ffmpeg-in-windows</a> (A potential error could occur when making new videos). On Ubuntu, the command is: <code class="docutils literal notranslate"><span class="pre">sudo</span> <span class="pre">apt</span> <span class="pre">install</span> <span class="pre">ffmpeg</span></code></p></li>
+</ul>
+</section>
+<section id="deeplabcut">
+<h3>DeepLabCut<a class="headerlink" href="#deeplabcut" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>If you git clone or download this folder, and are inside of it then <code class="docutils literal notranslate"><span class="pre">import</span> <span class="pre">deeplabcut</span></code> will import the package from the local folder rather than from the latest on PyPi!</p></li>
+</ul>
+</section>
+</section>
+<section id="system-wide-installation-considerations">
+<span id="sec-system-wide-considerations-during-install"></span><h2>System-wide installation considerations<a class="headerlink" href="#system-wide-installation-considerations" title="Link to this heading">#</a></h2>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><strong>What is a system-wide installation?</strong></p>
+<p>A system-wide installation, or a base environment installation, is when you install using the default Python environment/interpreter on your computer, instead of a compartmentalized, separate environment (e.g., a conda environment).</p>
+<p>This is often a source of conflicts between packages, user confusion and progressive “dependency hell” (where you have to keep installing and uninstalling packages to get the right versions for different applications).</p>
+<p>To avoid this, we recommend using a virtual environment (e.g., conda or uv managed environments) to keep your DeepLabCut installation separate from other Python packages and applications on your system.</p>
+</div>
+<p>If you perform a system-wide/base environment installation, and the computer has other Python packages or TensorFlow versions installed that conflict, this will overwrite them.</p>
+<p>If you have a dedicated machine for DeepLabCut, this may be <em>temporarily</em> fine, but will degrade over time as you try to install or update other packages.</p>
+<p>Indeed, if there are other applications that require different versions of libraries, then installing/updating anything would potentially break those applications.</p>
+<p>One way to manage virtual environments is to use conda environments (for which you need Anaconda/miniconda installed).
+An environment is a self-contained directory that contains a Python installation for a particular version of Python, plus additional packages, without any cross-talk with other environments (NVIDIA drivers being a notable exception, as they are system-wide by nature).</p>
+</section>
+<section id="hardware-considerations">
+<span id="sec-hardware-considerations-during-install"></span><h2>Hardware considerations<a class="headerlink" href="#hardware-considerations" title="Link to this heading">#</a></h2>
+<ul>
+<li><p><strong>Computer</strong>:</p>
+<ul class="simple">
+<li><p>For reference, we use e.g. Dell workstations (79xx series) with <strong>Ubuntu 16.04 LTS, 18.04 LTS, 20.04 LTS, 22.04 LTS</strong> and for versions prior to 2.2, we run a Docker container that has TensorFlow, etc. installed (<a class="github reference external" href="https://github.com/DeepLabCut/Docker4DeepLabCut2.0">DeepLabCut/Docker4DeepLabCut2.0</a>). Now we use the new Docker containers supplied on this repo (linux support only), also available through <a class="reference external" href="https://hub.docker.com/r/deeplabcut/deeplabcut">DockerHub</a> or the <a class="reference external" href="https://pypi.org/project/deeplabcut-docker/"><code class="docutils literal notranslate"><span class="pre">deeplabcut-docker</span></code></a> helper script.</p></li>
+</ul>
+</li>
+<li><p><strong>Computing Hardware</strong>:</p>
+<ul class="simple">
+<li><p>An NVIDIA GPU with <em>at least</em> 8GB VRAM (memory) is ideal.</p></li>
+<li><p>A GPU is not strictly necessary, but on a CPU the (training and evaluation) code is considerably slower (10x) for ResNets, but MobileNets are faster. You might also consider using cloud computing services like <a class="reference external" href="https://github.com/DeepLabCut/DeepLabCut/issues/47">Google cloud/amazon web services</a> or Google Colaboratory.</p></li>
+</ul>
+</li>
+<li><p><strong>Camera Hardware</strong>:</p>
+<ul class="simple">
+<li><p>The software is very robust to variations stemming from various cameras (cell phone cameras, grayscale, color; captured under infrared light, different manufacturers, etc.). See demos on our <a class="reference external" href="https://www.mousemotorlab.org/deeplabcut/">website</a>.</p></li>
+<li><p>Note that a model trained on certain data/camera may not generalize to data from a different camera however, so we recommend using the same camera for training and inference.</p></li>
+</ul>
+</li>
+<li><p><strong>Software</strong>:</p>
+<ul class="simple">
+<li><p>Operating System: Linux (Ubuntu), MacOS<a class="footnote-reference brackets" href="#id2" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a> (Mojave), or Windows 10. However, we the authors strongly recommend Ubuntu!</p></li>
+<li><p>DeepLabCut is written in Python 3 (<a class="reference external" href="https://www.python.org/">https://www.python.org/</a>) and not compatible with Python 2.</p></li>
+</ul>
+<!-- - If you want to use a pre3.0 version, you will need [TensorFlow](https://www.tensorflow.org/) (we used version 1.0 in the Nature Neuroscience paper, later versions also work with the provided code (we tested **TensorFlow versions 1.0 to 1.15, and 2.0 to 2.10**; we recommend TF2.10 now) for Python 3.8, 3.9, 3.10 with GPU support.
+  - As noted, is it possible to run DeepLabCut on your CPU, but it will be very slow (see: [Mathis & Warren](https://www.biorxiv.org/content/early/2018/10/30/457242)). However, this is the preferred path if you want to test DeepLabCut on your own computer/data before purchasing a GPU, with the added benefit of a straightforward installation! Otherwise, use our COLAB notebooks for GPU access for testing.
+   - Docker: We highly recommend advanced users use the supplied [Docker container](docker-containers) -->
+</li>
+</ul>
+<!-- ## Additional tips
+
+More {ref}`installation tips <installation-tips>` are also available. -->
+<hr class="footnotes docutils" />
+<aside class="footnote-list brackets">
+<aside class="footnote brackets" id="id2" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id1">1</a><span class="fn-bracket">]</span></span>
+<p>MacOS does not support NVIDIA GPUs (easily), so we only suggest this option for CPU use or a case where the user wants to label data, refine data, etc, and then push the project to a cloud resource for GPU computing steps, or use MobileNets</p>
+</aside>
+</aside>
+</section>
+<div class="toctree-wrapper compound">
+</div>
+</section>
+
+    <script type="text/x-thebe-config">
+    {
+        requestKernel: true,
+        binderOptions: {
+            repo: "binder-examples/jupyter-stacks-datascience",
+            ref: "master",
+        },
+        codeMirrorConfig: {
+            theme: "abcdef",
+            mode: "python"
+        },
+        kernelOptions: {
+            name: "python3",
+            path: "./docs"
+        },
+        predefinedOutput: true
+    }
+    </script>
+    <script>kernelName = 'python3'</script>
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="UseOverviewGuide.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">🥳 Get started with DeepLabCut: our key recommendations</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="docker.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">DeepLabCut in Docker</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#using-conda">Using Conda</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#before-you-start">🚨 Before you start…</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#step-1-install-miniconda">Step 1: Install miniconda</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#step-2-build-a-conda-environment">Step 2: Build a conda environment</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#tensorflow-support">TensorFlow support</a></li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#step-3-let-s-run-deeplabcut">Step 3: Let’s run DeepLabCut!</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#conda-environment-management-tips">Conda environment management tips</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#other-ways-to-install-deeplabcut">Other ways to install DeepLabCut</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#git-clone">git clone</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#uv-recommended-for-developers"><code class="docutils literal notranslate"><span class="pre">uv</span></code> (recommended for developers)</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pip"><code class="docutils literal notranslate"><span class="pre">pip</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#docker">Docker</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#creating-your-own-conda-environment">Creating your own conda environment</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#updating-your-installation">Updating your installation</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#data-compatibility">Data compatibility</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#gpu-support">GPU Support</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#general-gpu-support">General GPU support</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#installing-cuda-and-cudnn-for-tensorflow-gpu-support">Installing CUDA and cuDNN for TensorFlow GPU support</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#notes">Notes</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#troubleshooting">Troubleshooting</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#tensorflow">TensorFlow</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#ffmpeg">FFMPEG</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#deeplabcut">DeepLabCut</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#system-wide-installation-considerations">System-wide installation considerations</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#hardware-considerations">Hardware considerations</a></li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By The DeepLabCut Team
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  <p class="copyright">
+    
+      © Copyright 2023.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+<div class="extra_footer">
+  <div>Powered by <a href="https://jupyterbook.org/">Jupyter Book</a>.</div>
+
+</div>
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>
