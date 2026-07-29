@@ -26,6 +26,10 @@ on:
         required: false
         type: string
         default: ""
+      continue_on_error:
+        required: false
+        type: boolean
+        default: false
 
   workflow_dispatch:
     inputs:
@@ -58,6 +62,11 @@ on:
         required: false
         type: string
         default: ""
+      continue_on_error:
+        description: "Allow test steps to fail without marking the job as failed"
+        required: false
+        type: boolean
+        default: false
 
 jobs:
   build:
@@ -198,6 +207,7 @@ jobs:
           ffprobe -version
 
       - name: Run pytest
+        continue-on-error: ${{ inputs.continue_on_error }}
         shell: bash -el {0}
         env:
           FULL_SUITE: ${{ inputs.full_suite }}
@@ -226,6 +236,7 @@ jobs:
           PY
 
       - name: Run functional scripts
+        continue-on-error: ${{ inputs.continue_on_error }}
         shell: bash -el {0}
         env:
           FULL_SUITE: ${{ inputs.full_suite }}

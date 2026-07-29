@@ -136,7 +136,6 @@ jobs:
     name: Canary lane (dependency upgrades)
     needs: intelligent-test-selection
     if: needs.intelligent-test-selection.outputs.run_full == 'true'
-    continue-on-error: true
     uses: ./.github/workflows/python-package.yml
     with:
       concurrency_key: ${{ github.event.pull_request.number && format('pr-{0}', github.event.pull_request.number) || '' }}
@@ -155,6 +154,7 @@ jobs:
           "examples/testscript_pytorch_single_animal.py",
           "examples/testscript_pytorch_multi_animal.py"
         ]
+      continue_on_error: true
 
   tf-install-smoke-test:
     name: TensorFlow install smoke test
