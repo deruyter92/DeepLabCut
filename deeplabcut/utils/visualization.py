@@ -26,7 +26,7 @@ from skimage import color, io
 from tqdm import trange
 
 from deeplabcut.utils import auxfun_videos, auxiliaryfunctions
-from deeplabcut.utils.matplotlib_future_mode import get_colormap
+from deeplabcut.utils.matplotlib_compat import get_colormap
 
 PlotMode = Literal["bodypart", "individual"]
 BoundingBoxColor = Colormap | str | None
