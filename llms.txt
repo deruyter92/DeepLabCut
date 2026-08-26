@@ -1,0 +1,57 @@
+# DeepLabCut
+
+> Markerless pose-estimation of user-defined features with deep learning
+
+## Docs
+- [Welcome! 👋](https://deeplabcut.github.io/DeepLabCut/README.html): 📚Documentation | 🛠️ Installation | 🌎 Home Page | 🐿🐴🐁🐘🐆 Model Zoo | 🚨 News | 🪲 Reporting Issues
+
+## Getting started
+- [🥳 Get started with DeepLabCut: our key recommendations](https://deeplabcut.github.io/DeepLabCut/docs/UseOverviewGuide.html): Below we will first outline what you need to get started, the different ways you can use DeepLabCut, and then the full workflow. Note, we highly recommend you also read and follow our Nature Protocols paper, which is (still) fully relevant to standard DeepLabCut.
+- [Installing DeepLabCut](https://deeplabcut.github.io/DeepLabCut/docs/installation.html): DeepLabCut can be run on Windows, Linux, or MacOS as long as you have Python 3.10-3.12 installed
+
+## Main workflows overview
+- [DeepLabCut User Guide](https://deeplabcut.github.io/DeepLabCut/docs/main-workflows/user-guide.html): This guide covers the standard single-animal and multi-animal 2D pose estimation projects.
+- [3D DeepLabCut](https://deeplabcut.github.io/DeepLabCut/docs/Overviewof3D.html): In this repo we directly support 2-camera based 3D pose estimation. If you want n camera support, plus nicer optimization methods, please see our work that was published at ICRA 2021 on strong baseline 3D models (and a 3D dataset). In the link you will find how we optimize 6+ camera DLC output data…
+
+## GUI workflow
+- [Project Manager GUI](https://deeplabcut.github.io/DeepLabCut/docs/gui/PROJECT_GUI.html): As some users may be more comfortable working with an interactive interface, we wanted to provide an easy entry point to the software. All the main functionality is available in an easy-to-use GUI interface. While several advanced features are not fully available in this Project GUI, we hope this…
+- [napari GUI](https://deeplabcut.github.io/DeepLabCut/docs/gui/napari_GUI.html): Welcome to the documentation for napari-DLC, the napari plugin for keypoint annotation and label refinement. This plugin can be used either as part of the DeepLabCut GUI or as a standalone annotation tool.
+
+## Notebooks & Demos
+- [Notebooks for your data](https://deeplabcut.github.io/DeepLabCut/docs/notebooks/your_data.html)
+- [Demo notebooks](https://deeplabcut.github.io/DeepLabCut/docs/notebooks/main_demos.html)
+- [Additional features notebooks](https://deeplabcut.github.io/DeepLabCut/docs/notebooks/extra.html)
+
+## DeepLabCut 3.0 - PyTorch guides
+- [PyTorch backend guides](https://deeplabcut.github.io/DeepLabCut/docs/pytorch/index.html)
+
+## Advanced, Performance & Live
+- [The DeepLabCut Model Zoo!](https://deeplabcut.github.io/DeepLabCut/docs/ModelZoo.html)
+- [Running DeepLabCut models in real-time](https://deeplabcut.github.io/DeepLabCut/docs/dlc-live/deeplabcutlive.html): We provide two additional packages that allow you to record and stream camera data and run DeepLabCut models in real-time.
+- [DeepLabCut-live-GUI](https://deeplabcut.github.io/DeepLabCut/docs/dlc-live/dlc-live-gui/index.html): A graphical application for real-time pose estimation with DeepLabCut using one or more cameras.
+- [DeepLabCut benchmark](https://deeplabcut.github.io/DeepLabCut/docs/benchmark.html): For further information and the leaderboard, see the official homepage.
+- [Technical & hardware considerations](https://deeplabcut.github.io/DeepLabCut/docs/recipes/TechHardware.html)
+
+## Additional guides (Recipes)
+- [The DeepLabCut Cookbook](https://deeplabcut.github.io/DeepLabCut/docs/recipes/index.html)
+- [DeepLabCut-Utils - Community contributions](https://deeplabcut.github.io/DeepLabCut/docs/dlc-utils/index.html): The DeepLabCut-Utils repository contains various scripts as well as links to other packages related to DeepLabCut. Feel free to contribute your own analysis methods, and perhaps some short notebook of how to use it. Thanks!
+
+## Project & Community
+- [Mission and Values of DeepLabCut](https://deeplabcut.github.io/DeepLabCut/docs/MISSION_AND_VALUES.html): This document is meant to help guide decisions about the future of DeepLabCut, be it in terms of whether to accept new functionality, changes to the styling of the code or graphical user interfaces (GUI), or whether to take on new dependencies, when to break into other repos, among other things. It…
+- [roadmap](https://deeplabcut.github.io/DeepLabCut/docs/roadmap.html)
+- [Governance Model of DeepLabCut](https://deeplabcut.github.io/DeepLabCut/docs/Governance.html): (adapted from https://napari.org/stable/community/governance.html)
+- [Contributing to DeepLabCut](https://deeplabcut.github.io/DeepLabCut/CONTRIBUTING.html): Thanks for your interest in contributing to DeepLabCut! We welcome bug fixes, new features, documentation improvements, tests, and general maintenance contributions.
+- [How to Cite DeepLabCut](https://deeplabcut.github.io/DeepLabCut/docs/citation.html): Thank you for using DeepLabCut! Here are our recommendations for citing and documenting your use of DeepLabCut in your Methods section:
+
+## API reference
+- [Full API reference](https://deeplabcut.github.io/DeepLabCut/dev/main/reference/): every public module, class and function, generated from docstrings
+
+## Machine-readable index
+- [Index manifest](https://deeplabcut.github.io/DeepLabCut/knowledge/manifest.json): lists every indexed api version and which one is current
+- [Doc pages and sections](https://deeplabcut.github.io/DeepLabCut/knowledge/main/docs.jsonl): one JSON object per line, `{id, title, url, section, summary, ...}`
+- [API symbols](https://deeplabcut.github.io/DeepLabCut/knowledge/main/api.jsonl): one JSON object per line, `{id, kind, name, module, signature, summary, ...}`
+
+## Optional
+- [Source code](https://github.com/DeepLabCut/DeepLabCut): the DeepLabCut repository
+- [Issue tracker](https://github.com/DeepLabCut/DeepLabCut/issues): report bugs, request features
+- [Community forum](https://forum.image.sc/tag/deeplabcut): usage questions and support
