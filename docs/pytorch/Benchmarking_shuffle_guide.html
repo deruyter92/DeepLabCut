@@ -633,14 +633,14 @@ existing ones (e.g. TensorFlow shuffles).</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">deeplabcut</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">deeplabcut.core.engine</span><span class="w"> </span><span class="kn">import</span> <span class="n">Engine</span>
 
-<span class="n">config</span> <span class="o">=</span> <span class="s2">&quot;path/to/project/config.yaml&quot;</span>
+<span class="n">config</span> <span class="o">=</span> <span class="s2">"path/to/project/config.yaml"</span>
 
 <span class="n">training_dataset</span> <span class="o">=</span> <span class="n">deeplabcut</span><span class="o">.</span><span class="n">create_training_dataset_from_existing_split</span><span class="p">(</span>
    <span class="n">config</span><span class="o">=</span><span class="n">config</span><span class="p">,</span>
    <span class="n">from_shuffle</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
    <span class="n">from_trainsetindex</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
    <span class="n">shuffles</span><span class="o">=</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span>
-   <span class="n">net_type</span><span class="o">=</span><span class="s2">&quot;resnet_50&quot;</span><span class="p">,</span>
+   <span class="n">net_type</span><span class="o">=</span><span class="s2">"resnet_50"</span><span class="p">,</span>
 <span class="p">)</span>
 </pre></div>
 </div>
@@ -650,7 +650,7 @@ TensorFlow model.</p>
 </pre></div>
 </div>
 <p>Once trained we can evaluate our model using</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">deeplabcut</span><span class="o">.</span><span class="n">evaluate_network</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">Shuffles</span><span class="o">=</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span> <span class="n">snapshotindex</span><span class="o">=</span><span class="s2">&quot;all&quot;</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">deeplabcut</span><span class="o">.</span><span class="n">evaluate_network</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">Shuffles</span><span class="o">=</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span> <span class="n">snapshotindex</span><span class="o">=</span><span class="s2">"all"</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>Now, we can compare performances with peace of mind!</p>
