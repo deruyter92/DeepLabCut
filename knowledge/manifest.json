@@ -9,8 +9,7 @@
     "latest": "main",
     "versions": [
       "main",
-      "myrc10",
-      "tests"
+      "myrc10"
     ]
   }
 }
