@@ -8,8 +8,8 @@
   },
   "docs": {
     "package_version": "3.0.1",
-    "revision": "663f64d8015138b0c345c9e658f5fe728c4a9586",
-    "generated_at": "2026-08-27T12:09:42+00:00"
+    "revision": "c63b24e9380407f39c950c43e6d2e9b4e62d7ccd",
+    "generated_at": "2026-08-27T12:42:34+00:00"
   },
   "extractor_version": "0.0.1",
   "generated_by": "tools/knowledge_indexing"
