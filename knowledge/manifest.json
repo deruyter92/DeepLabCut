@@ -9,7 +9,8 @@
     "latest": "main",
     "versions": [
       "main",
-      "myrc10"
+      "myrc10",
+      "ourlatestrelease"
     ]
   }
 }
