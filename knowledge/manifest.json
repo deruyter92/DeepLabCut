@@ -8,7 +8,8 @@
     "versioned": true,
     "latest": "main",
     "versions": [
-      "main"
+      "main",
+      "tests"
     ]
   }
 }
