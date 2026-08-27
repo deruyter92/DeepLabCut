@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "api_version_label": "myrc10",
+  "api": {
+    "package_version": "3.0.0rc10",
+    "revision": "d11f09390c7997b916a3fd42cd8ff56d2eee1e5f",
+    "generated_at": "2026-08-27T13:11:29+00:00"
+  },
+  "docs": null,
+  "extractor_version": "0.0.1",
+  "generated_by": "tools/knowledge_indexing"
+}
