@@ -1,5 +1,12 @@
 [
   {
+    "version": "ourlatestrelease",
+    "title": "ourlatestrelease",
+    "aliases": [
+      "latest-release"
+    ]
+  },
+  {
     "version": "myrc10",
     "title": "myrc10",
     "aliases": []
