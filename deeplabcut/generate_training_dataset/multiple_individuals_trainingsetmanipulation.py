@@ -19,21 +19,18 @@ from pathlib import Path
 import numpy as np
 from tqdm import tqdm
 
-import deeplabcut.compat as compat
 import deeplabcut.generate_training_dataset.metadata as metadata
 from deeplabcut.core.config import ProjectConfig
-from deeplabcut.core.engine import Engine
+from deeplabcut.core.deprecation import DeprecationRound, renamed_parameter
+from deeplabcut.core.engine import Engine, get_project_engine
 from deeplabcut.core.weight_init import WeightInitialization
 from deeplabcut.utils import (
-    auxfun_models,
     auxfun_multianimal,
     auxiliaryfunctions,
 )
 
 from .trainingsetmanipulation import (
     MakeInference_yaml,
-    MakeTest_pose_yaml,
-    MakeTrain_pose_yaml,
     SplitTrials,
     merge_annotateddatasets,
     pad_train_test_indices,
@@ -100,10 +97,13 @@ def format_multianimal_training_data(
     return train_data
 
 
+@renamed_parameter(old="Shuffles", new="shuffles", deprecation_round=DeprecationRound.PARAMETER_ALIASING_302)
+@renamed_parameter(old="trainIndices", new="train_indices", deprecation_round=DeprecationRound.PARAMETER_ALIASING_302)
+@renamed_parameter(old="testIndices", new="test_indices", deprecation_round=DeprecationRound.PARAMETER_ALIASING_302)
 def create_multianimaltraining_dataset(
     config: str | Path | ProjectConfig | dict,
     num_shuffles=1,
-    Shuffles=None,
+    shuffles=None,
     windows2linux=False,
     net_type=None,
     detector_type=None,
@@ -111,8 +111,8 @@ def create_multianimaltraining_dataset(
     crop_size=(400, 400),
     crop_sampling="hybrid",
     paf_graph=None,
-    trainIndices=None,
-    testIndices=None,
+    train_indices=None,
+    test_indices=None,
     n_edges_threshold=105,
     paf_graph_degree=6,
     userfeedback: bool = True,
@@ -133,7 +133,7 @@ def create_multianimaltraining_dataset(
             Alternatively, a ProjectConfig object or a dictionary can be passed.
         num_shuffles (int, optional): Number of shuffles of training dataset to create,
             i.e. [1,2,3] for num_shuffles=3. Defaults to 1.
-        Shuffles (list of shuffles): Alternatively the user can also give a list of
+        shuffles (list of shuffles): Alternatively the user can also give a list of
             shuffles (integers!).
         net_type (string): Type of networks. The options available depend on which
             engine is used. See Lauer et al. 2021
@@ -207,10 +207,10 @@ def create_multianimaltraining_dataset(
             specific one. Note that, in that case, the data-driven selection procedure
             upon model evaluation will be skipped. "config" will use the skeleton
             defined in the config file. Defaults to None.
-        trainIndices (list of lists, optional): List of one or multiple lists containing
+        train_indices (list of lists, optional): List of one or multiple lists containing
             train indexes. A list containing two lists of training indexes will produce
             two splits. Defaults to None.
-        testIndices (list of lists, optional): List of one or multiple lists containing
+        test_indices (list of lists, optional): List of one or multiple lists containing
             test indexes. Defaults to None.
         n_edges_threshold (int, optional): Only for the TensorFlow engine. Number of
             edges above which the graph is automatically pruned. Defaults to 105.
@@ -226,7 +226,7 @@ def create_multianimaltraining_dataset(
         engine (Engine, optional): Whether to create a pose config for a Tensorflow or
             PyTorch model. Defaults to the value specified in the project configuration
             file. If no engine is specified for the project, defaults to
-            ``deeplabcut.compat.DEFAULT_ENGINE``.
+            ``deeplabcut.core.engine.DEFAULT_ENGINE``.
         ctd_conditions (int | str | Path | tuple[int, str] | tuple[int, int], optional):
             If using a conditional-top-down (CTD) net_type, this argument needs to be
             specified. It defines the conditions that will be used with the CTD model.
@@ -249,16 +249,16 @@ def create_multianimaltraining_dataset(
 
             deeplabcut.create_multianimaltraining_dataset(
                 "/analysis/project/reaching-task/config.yaml",
-                Shuffles=[0, 1, 2],
-                trainIndices=[trainInd1, trainInd2, trainInd3],
-                testIndices=[testInd1, testInd2, testInd3],
+                shuffles=[0, 1, 2],
+                train_indices=[trainInd1, trainInd2, trainInd3],
+                test_indices=[testInd1, testInd2, testInd3],
             )
 
         Windows:
 
             deeplabcut.create_multianimaltraining_dataset(
                 r"C:\\Users\\Ulf\\looming-task\\config.yaml",
-                Shuffles=[3, 17, 5],
+                shuffles=[3, 17, 5],
             )
     """
     if windows2linux:
@@ -300,7 +300,7 @@ def create_multianimaltraining_dataset(
 
     # load the engine to use to create the shuffle
     if engine is None:
-        engine = compat.get_project_engine(cfg)
+        engine = get_project_engine(cfg)
 
     if not (any(net in net_type for net in ("resnet", "eff", "dlc", "mob")) or engine == Engine.PYTORCH):
         raise ValueError(f"Unsupported network {net_type} for engine {engine}.")
@@ -355,27 +355,30 @@ def create_multianimaltraining_dataset(
 
     # Loading the encoder (if necessary downloading from TF)
     dlcparent_path = auxiliaryfunctions.get_deeplabcut_path()
-    defaultconfigfile = dlcparent_path / "pose_cfg.yaml"
+    defaultconfigfile = os.path.join(dlcparent_path, "pose_cfg.yaml")
 
     if engine == Engine.PYTORCH:
         model_path = dlcparent_path
     else:
-        model_path = auxfun_models.check_for_weights(net_type, dlcparent_path)
+        from deeplabcut.tensorflow_compat.dataset_management.create_single_animal import (
+            _tf_get_model_path,
+        )
 
-    Shuffles = validate_shuffles(cfg, Shuffles, num_shuffles, userfeedback)
+        model_path = _tf_get_model_path(net_type, dlcparent_path)
 
-    # print(trainIndices,testIndices, Shuffles, augmenter_type,net_type)
-    if trainIndices is None and testIndices is None:
+    shuffles = validate_shuffles(cfg, shuffles, num_shuffles, userfeedback)
+
+    if train_indices is None and test_indices is None:
         splits = []
-        for shuffle in Shuffles:  # Creating shuffles starting from 1
+        for shuffle in shuffles:  # Creating shuffles starting from 1
             for train_frac in cfg["TrainingFraction"]:
                 train_inds, test_inds = SplitTrials(range(len(Data)), train_frac)
                 splits.append((train_frac, shuffle, (train_inds, test_inds)))
     else:
-        if len(trainIndices) != len(testIndices) != len(Shuffles):
-            raise ValueError("Number of Shuffles and train and test indexes should be equal.")
+        if len(train_indices) != len(test_indices) != len(shuffles):
+            raise ValueError("Number of shuffles and train and test indexes should be equal.")
         splits = []
-        for shuffle, (train_inds, test_inds) in enumerate(zip(trainIndices, testIndices, strict=False)):
+        for shuffle, (train_inds, test_inds) in enumerate(zip(train_indices, test_indices, strict=False)):
             trainFraction = round(len(train_inds) * 1.0 / (len(train_inds) + len(test_inds)), 2)
             print(f"You passed a split with the following fraction: {int(100 * trainFraction)}%")
             # Now that the training fraction is guaranteed to be correct,
@@ -384,14 +387,14 @@ def create_multianimaltraining_dataset(
             train_inds = train_inds[train_inds != -1]
             test_inds = np.asarray(test_inds)
             test_inds = test_inds[test_inds != -1]
-            splits.append((trainFraction, Shuffles[shuffle], (train_inds, test_inds)))
+            splits.append((trainFraction, shuffles[shuffle], (train_inds, test_inds)))
 
     top_down = False
     if engine == Engine.PYTORCH and net_type.startswith("top_down_"):
         top_down = True
         net_type = net_type[len("top_down_") :]
 
-    for trainFraction, shuffle, (trainIndices, testIndices) in splits:
+    for trainFraction, shuffle, (train_inds, test_inds) in splits:
         ####################################################
         # Generating data structure with labeled information & frame metadata (for deep cut)
         ####################################################
@@ -405,12 +408,12 @@ def create_multianimaltraining_dataset(
         # Make training file!
         data = format_multianimal_training_data(
             Data,
-            trainIndices,
+            train_inds,
             cfg["project_path"],
             numdigits,
         )
 
-        if len(trainIndices) > 0:
+        if len(train_inds) > 0:
             (
                 datafilename,
                 metadatafilename,
@@ -421,8 +424,8 @@ def create_multianimaltraining_dataset(
             auxiliaryfunctions.save_metadata(
                 Path(project_path) / metadatafilename,
                 data,
-                trainIndices,
-                testIndices,
+                train_inds,
+                test_inds,
                 trainFraction,
             )
             metadata.update_metadata(
@@ -430,8 +433,8 @@ def create_multianimaltraining_dataset(
                 train_fraction=trainFraction,
                 shuffle=shuffle,
                 engine=engine,
-                train_indices=trainIndices,
-                test_indices=testIndices,
+                train_indices=train_inds,
+                test_indices=test_inds,
                 overwrite=not userfeedback,
             )
 
@@ -462,73 +465,29 @@ def create_multianimaltraining_dataset(
             path_inference_config = str(Path(cfg["project_path"]) / modelfoldername / "test" / "inference_cfg.yaml")
 
             if engine == Engine.TF:
-                jointnames = [str(bpt) for bpt in multianimalbodyparts]
-                jointnames.extend([str(bpt) for bpt in uniquebodyparts])
-                items2change = {
-                    "dataset": datafilename,
-                    "engine": engine.aliases[0],
-                    "metadataset": metadatafilename,
-                    "num_joints": len(multianimalbodyparts) + len(uniquebodyparts),  # cfg["uniquebodyparts"]),
-                    "all_joints": [
-                        [i] for i in range(len(multianimalbodyparts) + len(uniquebodyparts))
-                    ],  # cfg["uniquebodyparts"]))],
-                    "all_joints_names": jointnames,
-                    "init_weights": str(model_path),
-                    "project_path": str(cfg["project_path"]),
-                    "net_type": net_type,
-                    "multi_stage": multi_stage,
-                    "pairwise_loss_weight": 0.1,
-                    "pafwidth": 20,
-                    "partaffinityfield_graph": partaffinityfield_graph,
-                    "partaffinityfield_predict": partaffinityfield_predict,
-                    "weigh_only_present_joints": False,
-                    "num_limbs": len(partaffinityfield_graph),
-                    "dataset_type": dataset_type,
-                    "optimizer": "adam",
-                    "batch_size": 8,
-                    "multi_step": [[1e-4, 7500], [5 * 1e-5, 12000], [1e-5, 200000]],
-                    "save_iters": 10000,
-                    "display_iters": 500,
-                    "num_idchannel": (len(cfg["individuals"]) if cfg.get("identity", False) else 0),
-                    "crop_size": list(crop_size),
-                    "crop_sampling": crop_sampling,
-                }
-
-                trainingdata = MakeTrain_pose_yaml(
-                    items2change,
-                    path_train_config,
-                    defaultconfigfile,
-                    save=(engine == Engine.TF),
+                from deeplabcut.tensorflow_compat.dataset_management.create_multi_animal import (
+                    _tf_create_multianimal_pose_config_files,
                 )
-                keys2save = [
-                    "dataset",
-                    "num_joints",
-                    "all_joints",
-                    "all_joints_names",
-                    "net_type",
-                    "multi_stage",
-                    "init_weights",
-                    "global_scale",
-                    "location_refinement",
-                    "locref_stdev",
-                    "dataset_type",
-                    "partaffinityfield_predict",
-                    "pairwise_predict",
-                    "partaffinityfield_graph",
-                    "num_limbs",
-                    "dataset_type",
-                    "num_idchannel",
-                ]
 
-                MakeTest_pose_yaml(
-                    trainingdata,
-                    keys2save,
-                    path_test_config,
-                    nmsradius=5.0,
-                    minconfidence=0.01,
-                    sigma=1,
-                    locref_smooth=False,
-                )  # setting important def. values for inference
+                _tf_create_multianimal_pose_config_files(
+                    datafilename=datafilename,
+                    metadatafilename=metadatafilename,
+                    multianimalbodyparts=multianimalbodyparts,
+                    uniquebodyparts=uniquebodyparts,
+                    model_path=model_path,
+                    project_path=str(cfg["project_path"]),
+                    net_type=net_type,
+                    multi_stage=multi_stage,
+                    partaffinityfield_graph=partaffinityfield_graph,
+                    partaffinityfield_predict=partaffinityfield_predict,
+                    dataset_type=dataset_type,
+                    crop_size=crop_size,
+                    crop_sampling=crop_sampling,
+                    cfg=cfg,
+                    path_train_config=path_train_config,
+                    defaultconfigfile=defaultconfigfile,
+                    path_test_config=path_test_config,
+                )
             elif engine == Engine.PYTORCH:
                 from deeplabcut.pose_estimation_pytorch.config.make_pose_config import (
                     make_pytorch_pose_config,
@@ -675,9 +634,9 @@ def convert_cropped_to_standard_dataset(
         shuffle_inds.add(int(re.findall(r"shuffle(\d+)", str(file))[0]))
     create_multianimaltraining_dataset(
         config_path,
-        trainIndices=train_idx,
-        testIndices=test_idx,
-        Shuffles=sorted(shuffle_inds),
+        train_indices=train_idx,
+        test_indices=test_idx,
+        shuffles=sorted(shuffle_inds),
         net_type=net_type,
         paf_graph=pose_cfg["partaffinityfield_graph"],
         crop_size=pose_cfg.get("crop_size", [400, 400]),

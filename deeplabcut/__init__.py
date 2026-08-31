@@ -13,265 +13,82 @@ from __future__ import annotations
 
 import logging
 import os
-from importlib import import_module
-from typing import Any
+import warnings
+
+import lazy_loader as lazy
+
+from deeplabcut.core.deprecation import DLCDeprecationWarning
+
+from .version import VERSION, __version__
 
 logger = logging.getLogger(__name__)
 
 # DEBUG="", "0", "false", "no" -> False
 DEBUG = os.environ.get("DEBUG", "").strip().lower() not in {"", "0", "false", "no"}
 
-from .version import VERSION, __version__
-
 if DEBUG:
     logger.debug("Loading DLC %s", VERSION)
 
-# -----------------------------------------------------------------------------
-# Always-available public API
-# -----------------------------------------------------------------------------
-
-# Train / evaluate / predict functions (compat layer)
-from .compat import (
-    analyze_images,
-    analyze_time_lapse_frames,
-    analyze_videos,
-    convert_detections2tracklets,
-    create_tracking_dataset,
-    evaluate_network,
-    export_model,
-    extract_maps,
-    extract_save_all_maps,
-    return_evaluate_network_data,
-    return_train_network_path,
-    train_network,
-    visualize_locrefs,
-    visualize_paf,
-    visualize_scoremaps,
-)
-from .core.engine import Engine
-from .create_project import (
-    add_new_videos,
-    create_new_project,
-    create_new_project_3d,
-    create_pretrained_human_project,
-    create_pretrained_project,
-    load_demo_data,
-)
-from .generate_training_dataset import (
-    adddatasetstovideolistandviceversa,
-    check_labels,
-    comparevideolistsanddatafolders,
-    create_multianimaltraining_dataset,
-    create_training_dataset,
-    create_training_dataset_from_existing_split,
-    create_training_model_comparison,
-    dropannotationfileentriesduetodeletedimages,
-    dropduplicatesinannotatinfiles,
-    dropimagesduetolackofannotation,
-    dropunlabeledframes,
-    extract_frames,
-    mergeandsplit,
-)
-from .modelzoo.video_inference import video_inference_superanimal
-from .pose_estimation_3d import (
-    calibrate_cameras,
-    check_undistortion,
-    create_labeled_video_3d,
-    triangulate,
-)
-from .post_processing import analyzeskeleton, filterpredictions
-from .refine_training_dataset import (
-    extract_outlier_frames,
-    find_outliers_in_raw_data,
-    merge_datasets,
-)
-from .refine_training_dataset.stitch import stitch_tracklets
-from .utils import (
-    analyze_videos_converth5_to_csv,
-    analyze_videos_converth5_to_nwb,
-    auxfun_videos,
-    auxiliaryfunctions,
-    convert2_maDLC,
-    convertcsv2h5,
-    create_labeled_video,
-    create_video_with_all_detections,
-    plot_trajectories,
-)
-from .utils.auxfun_videos import (
-    CropVideo,
-    DownSampleVideo,
-    ShortenVideo,
-    check_video_integrity,
-    collect_video_paths,
-)
+# DeepLabCut deprecation warnings are shown only once per message instance.
+warnings.filterwarnings("once", category=DLCDeprecationWarning)
 
 # -----------------------------------------------------------------------------
-# Optional / lazy public API
+# Stub-driven lazy loading
 # -----------------------------------------------------------------------------
-# These names are part of the public API, but importing them may require
-# optional GUI or torch dependencies, so we lazy load them.
-#
-# Example:
-#   import deeplabcut as dlc
-#   dlc.launch_dlc()           # imports GUI code lazily
-#   dlc.transformer_reID(...)  # imports torch-dependent code lazily
+# ``deeplabcut/__init__.pyi`` is the single declarative source of truth for the
+# top-level public API. ``lazy_loader.attach_stub`` reads it at runtime to
+# install ``__getattr__``, ``__dir__``, and ``__all__``, so each implementation
+# module is imported only when its top-level attribute is first accessed.
 # -----------------------------------------------------------------------------
 
-_OPTIONAL_EXPORTS: dict[str, tuple[str, str]] = {
-    # GUI
-    "launch_dlc": (".gui.launch_script", "launch_dlc"),
-    "label_frames": (".gui.tabs.label_frames", "label_frames"),
-    "refine_labels": (".gui.tabs.label_frames", "refine_labels"),
-    "refine_tracklets": (".gui.tracklet_toolbox", "refine_tracklets"),
-    "SkeletonBuilder": (".gui.widgets", "SkeletonBuilder"),
-    # Optional torch feature
-    "transformer_reID": (".pose_tracking_pytorch", "transformer_reID"),
-}
+_lazy_getattr, __dir__, __all__ = lazy.attach_stub(__name__, __file__)
+
+# -----------------------------------------------------------------------------
+# Optional-dependency diagnostics
+# -----------------------------------------------------------------------------
+# A plain ``attach_stub`` raises ``ModuleNotFoundError`` when a GUI or PyTorch
+# tracking module is unavailable. Translate only those into actionable
+# ``ImportError`` messages and leave unrelated import failures untouched.
+# -----------------------------------------------------------------------------
+
+_GUI_EXPORTS = frozenset(
+    {
+        "launch_dlc",
+        "label_frames",
+        "refine_labels",
+        "refine_tracklets",
+        "SkeletonBuilder",
+    }
+)
+
+_TORCH_EXPORTS = frozenset({"transformer_reID"})
+
+_GUI_DEPENDENCY_MODULES = frozenset({"PySide6", "napari", "qdarkstyle"})
+_TORCH_DEPENDENCY_MODULES = frozenset({"torch", "torchvision"})
 
 
-def __getattr__(name: str) -> Any:
-    """Lazily load optional public exports."""
-    if name not in _OPTIONAL_EXPORTS:
-        raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+def _is_missing_gui_dependency(exc: ModuleNotFoundError) -> bool:
+    """Return True if ``exc`` is caused by a missing GUI dependency."""
+    name = getattr(exc, "name", None)
+    return isinstance(name, str) and name.split(".")[0] in _GUI_DEPENDENCY_MODULES
 
-    module_name, attr_name = _OPTIONAL_EXPORTS[name]
 
+def _is_missing_torch_dependency(exc: ModuleNotFoundError) -> bool:
+    """Return True if ``exc`` is caused by a missing PyTorch dependency."""
+    name = getattr(exc, "name", None)
+    return isinstance(name, str) and name.split(".")[0] in _TORCH_DEPENDENCY_MODULES
+
+
+def __getattr__(name: str):
     try:
-        module = import_module(module_name, package=__name__)
-        value = getattr(module, attr_name)
-    except (ModuleNotFoundError, ImportError) as exc:
-        if name in {
-            "launch_dlc",
-            "label_frames",
-            "refine_labels",
-            "refine_tracklets",
-            "SkeletonBuilder",
-        }:
-            raise AttributeError(
-                f"{name!r} is unavailable because DeepLabCut was loaded without GUI dependencies."
+        return _lazy_getattr(name)
+    except ModuleNotFoundError as exc:
+        if name in _GUI_EXPORTS and _is_missing_gui_dependency(exc):
+            raise ImportError(
+                f"{name!r} requires the DeepLabCut GUI dependencies. Install the supported GUI extra."
             ) from exc
 
-        if name == "transformer_reID":
-            raise AttributeError(
-                f"{name!r} is unavailable because the PyTorch-based tracking dependencies are not installed."
-            ) from exc
+        if name in _TORCH_EXPORTS and _is_missing_torch_dependency(exc):
+            raise ImportError(f"{name!r} requires the PyTorch tracking dependencies.") from exc
 
-        raise AttributeError(f"module {__name__!r} has no attribute {name!r}") from exc
-
-    # Cache the resolved object so future access is fast
-    globals()[name] = value
-    return value
-
-
-def __dir__() -> list[str]:
-    """Improve IDE / autocomplete discoverability."""
-    return sorted(set(globals()) | set(__all__))
-
-
-# -----------------------------------------------------------------------------
-# Public API
-# -----------------------------------------------------------------------------
-
-_VERSION_EXPORTS = [
-    "__version__",
-    "VERSION",
-    "DEBUG",
-]
-
-_CORE_EXPORTS = [
-    "Engine",
-]
-
-_PROJECT_EXPORTS = [
-    "add_new_videos",
-    "create_new_project",
-    "create_new_project_3d",
-    "create_pretrained_human_project",
-    "create_pretrained_project",
-    "load_demo_data",
-]
-
-_DATASET_EXPORTS = [
-    "adddatasetstovideolistandviceversa",
-    "check_labels",
-    "comparevideolistsanddatafolders",
-    "create_multianimaltraining_dataset",
-    "create_training_dataset",
-    "create_training_dataset_from_existing_split",
-    "create_training_model_comparison",
-    "dropannotationfileentriesduetodeletedimages",
-    "dropduplicatesinannotatinfiles",
-    "dropimagesduetolackofannotation",
-    "dropunlabeledframes",
-    "extract_frames",
-    "mergeandsplit",
-]
-
-_COMPAT_EXPORTS = [
-    "analyze_images",
-    "analyze_time_lapse_frames",
-    "analyze_videos",
-    "convert_detections2tracklets",
-    "create_tracking_dataset",
-    "evaluate_network",
-    "export_model",
-    "extract_maps",
-    "extract_save_all_maps",
-    "return_evaluate_network_data",
-    "return_train_network_path",
-    "train_network",
-    "visualize_locrefs",
-    "visualize_paf",
-    "visualize_scoremaps",
-]
-
-_UTIL_EXPORTS = [
-    "analyze_videos_converth5_to_csv",
-    "analyze_videos_converth5_to_nwb",
-    "auxfun_videos",
-    "auxiliaryfunctions",
-    "convert2_maDLC",
-    "convertcsv2h5",
-    "create_labeled_video",
-    "create_video_with_all_detections",
-    "plot_trajectories",
-    "CropVideo",
-    "DownSampleVideo",
-    "ShortenVideo",
-    "check_video_integrity",
-]
-
-_POST_PROCESSING_EXPORTS = [
-    "analyzeskeleton",
-    "filterpredictions",
-    "extract_outlier_frames",
-    "find_outliers_in_raw_data",
-    "merge_datasets",
-    "stitch_tracklets",
-]
-
-_THREE_D_EXPORTS = [
-    "calibrate_cameras",
-    "check_undistortion",
-    "create_labeled_video_3d",
-    "triangulate",
-]
-
-_MODELZOO_EXPORTS = [
-    "video_inference_superanimal",
-]
-
-_OPTIONAL_API_EXPORTS = list(_OPTIONAL_EXPORTS)
-
-__all__ = (
-    _VERSION_EXPORTS
-    + _CORE_EXPORTS
-    + _PROJECT_EXPORTS
-    + _DATASET_EXPORTS
-    + _COMPAT_EXPORTS
-    + _UTIL_EXPORTS
-    + _POST_PROCESSING_EXPORTS
-    + _THREE_D_EXPORTS
-    + _MODELZOO_EXPORTS
-    + _OPTIONAL_API_EXPORTS
-)
+        raise
