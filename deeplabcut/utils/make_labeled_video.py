@@ -45,7 +45,8 @@ from skimage.draw import disk, line_aa, rectangle_perimeter, set_color
 from skimage.util import img_as_ubyte
 from tqdm import trange
 
-from deeplabcut.core.deprecation import renamed_parameter
+from deeplabcut.core.config import ProjectConfig
+from deeplabcut.core.deprecation import DeprecationRound, renamed_parameter
 from deeplabcut.core.engine import Engine
 from deeplabcut.pose_estimation_pytorch.config import PoseConfig
 from deeplabcut.utils import auxfun_multianimal, auxiliaryfunctions, visualization
@@ -390,9 +391,9 @@ def CreateVideoSlow(
     plt.switch_backend(prev_backend)
 
 
-@renamed_parameter(old="videotype", new="video_extensions", since="3.0.0")
+@renamed_parameter(old="videotype", new="video_extensions", deprecation_round=DeprecationRound.INIT_PARAMETER_ALIASING)
 def create_labeled_video(
-    config: str | Path,
+    config: ProjectConfig | dict | Path | str,
     videos: list[str | Path],
     video_extensions: str | Sequence[str] | None = None,
     shuffle: int = 1,
@@ -434,7 +435,7 @@ def create_labeled_video(
     ``deeplabcut.analyze_videos``.
 
     Args:
-        config (str | Path): Full path of the config.yaml file.
+        config (ProjectConfig | dict | Path | str): Full path of the config.yaml file.
         videos (list[str | Path]): A list of strings containing the full paths to videos for analysis or a path
             to the directory, where all the videos with same extension are stored.
         video_extensions (str | Sequence[str] | None, optional): Controls how ``videos`` are
@@ -1017,7 +1018,9 @@ def create_video_with_keypoints_only(
     ny = int(np.nanmax(df.xs("y", axis=1, level="coords")))
 
     n_frames = df.shape[0]
-    xyp = df.values.reshape((n_frames, -1, 3))
+    # copy=True: `coords` is a view into `xyp` and is masked in place below;
+    # under pandas 3 CoW `.values` would return a read-only view.
+    xyp = df.to_numpy(copy=True).reshape((n_frames, -1, 3))
 
     if color_by == "bodypart":
         map_ = bodyparts.map(dict(zip(bodypart_names, range(n_bodyparts), strict=False)))
@@ -1069,9 +1072,9 @@ def create_video_with_keypoints_only(
     plt.switch_backend(prev_backend)
 
 
-@renamed_parameter(old="videotype", new="video_extensions", since="3.0.0")
+@renamed_parameter(old="videotype", new="video_extensions", deprecation_round=DeprecationRound.INIT_PARAMETER_ALIASING)
 def create_video_with_all_detections(
-    config: str | Path,
+    config: ProjectConfig | dict | Path | str,
     videos: list[str | Path],
     video_extensions: str | Sequence[str] | None = None,
     shuffle=1,
@@ -1087,7 +1090,7 @@ def create_video_with_all_detections(
     """Create a video labeled with all the detections stored in a '*_full.pickle' file.
 
     Args:
-        config (str | Path): Absolute path to the config.yaml file.
+        config (ProjectConfig | dict | Path | str): Absolute path to the config.yaml file.
         videos (list[str | Path]): Full paths to videos for analysis, or a directory where all
             videos with the same extension are stored.
         video_extensions (str | Sequence[str] | None, optional): Controls how ``videos`` are

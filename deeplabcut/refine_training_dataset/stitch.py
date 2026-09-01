@@ -22,7 +22,6 @@ import matplotlib.pyplot as plt
 import networkx as nx
 import numpy as np
 import pandas as pd
-import scipy.linalg.interpolative as sli
 from networkx.algorithms.flow import preflow_push
 from scipy.linalg import hankel
 from scipy.spatial.distance import directed_hausdorff
@@ -30,7 +29,7 @@ from scipy.stats import mode
 from tqdm import trange
 
 import deeplabcut
-from deeplabcut.core.deprecation import renamed_parameter
+from deeplabcut.core.deprecation import DeprecationRound, renamed_parameter
 from deeplabcut.core.trackingutils import (
     TRACK_METHODS,
     calc_iou,
@@ -384,11 +383,11 @@ class Tracklet:
         4/sqrt(3)
         """
         mat = self.to_hankelet()
-        if np.any(mat):  # check that the matrix contains non-zero entries
+        if np.any(mat):
             # nrows, ncols = mat.shape
             # beta = nrows / ncols
             # omega = 0.56 * beta ** 3 - 0.95 * beta ** 2 + 1.82 * beta + 1.43
-            _, s, _ = sli.svd(mat, min(10, min(mat.shape)))
+            s = np.linalg.svd(mat, compute_uv=False)[:10]
         else:
             s = np.zeros(min(10, min(mat.shape)))
 
@@ -973,9 +972,10 @@ class TrackletStitcher:
                 return path
 
 
-@renamed_parameter(old="videotype", new="video_extensions", since="3.0.0")
+@renamed_parameter(old="videotype", new="video_extensions", deprecation_round=DeprecationRound.INIT_PARAMETER_ALIASING)
+@renamed_parameter(old="config_path", new="config", deprecation_round=DeprecationRound.INIT_PARAMETER_ALIASING)
 def stitch_tracklets(
-    config_path: str | Path,
+    config: str | Path,
     videos: list[str | Path],
     video_extensions: str | Sequence[str] | None = None,
     shuffle=1,
@@ -999,7 +999,7 @@ def stitch_tracklets(
     optimization problem.
 
     Args:
-        config_path (str | Path): Path to the main project config.yaml file.
+        config (str | Path): Path to the main project config.yaml file.
         videos (list[str | Path]): Full paths to videos for analysis, or a directory where all videos
             with the same extension are stored.
         video_extensions (str | Sequence[str] | None, optional): Controls how ``videos`` are
@@ -1071,7 +1071,7 @@ def stitch_tracklets(
         print("No video(s) found. Please check your path!")
         return
 
-    cfg = auxiliaryfunctions.read_config(config_path)
+    cfg = auxiliaryfunctions.read_config(config)
     track_method = auxfun_multianimal.get_track_method(cfg, track_method=track_method)
     if track_method == "ctd":
         raise ValueError(

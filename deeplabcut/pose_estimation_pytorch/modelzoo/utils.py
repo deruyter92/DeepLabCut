@@ -21,11 +21,14 @@ import torch
 from dlclibrary import download_huggingface_model
 
 import deeplabcut.pose_estimation_pytorch.config.utils as config_utils
-from deeplabcut.core.deprecation import deprecated
+from deeplabcut.core.deprecation import DeprecationRound, deprecated
 from deeplabcut.utils import auxiliaryfunctions
 
 # COCO category ID for the "person" class.
 COCO_PERSON_CATEGORY_ID = 1
+MODEL_FILENAME_MAPPING = {
+    "superanimal_humanbody_rtmpose_x": "rtmpose-x_simcc-body7.pt",
+}
 
 
 def get_model_configs_folder_path() -> Path:
@@ -89,7 +92,9 @@ def get_super_animal_snapshot_path(
     return model_path
 
 
-@deprecated(replacement="PoseConfig.build_for_superanimal_inference", since="3.0.1")
+@deprecated(
+    replacement="PoseConfig.build_for_superanimal_inference", deprecation_round=DeprecationRound.CONFIG_MODEL_MIGRATION
+)
 def load_super_animal_config(
     super_animal: str,
     model_name: str,
@@ -126,10 +131,15 @@ def download_super_animal_snapshot(dataset: str, model_name: str) -> Path:
     model_filename = f"{model_name}.pt"
     model_path = snapshot_dir / model_filename
 
+    source_filename = MODEL_FILENAME_MAPPING.get(model_name, model_filename)
+    if model_filename == source_filename:
+        rename_mapping = None
+    else:
+        rename_mapping = {source_filename: model_filename}
     download_huggingface_model(
         model_name,
         target_dir=str(snapshot_dir),
-        rename_mapping={model_filename: model_filename},
+        rename_mapping=rename_mapping,
     )
     if not model_path.exists():
         raise RuntimeError(f"Failed to download {model_name} to {model_path}")

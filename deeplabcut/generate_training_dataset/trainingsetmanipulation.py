@@ -18,16 +18,14 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
-import yaml
 from PIL import Image
 
-import deeplabcut.compat as compat
 import deeplabcut.generate_training_dataset.metadata as metadata
-from deeplabcut.core.config import ProjectConfig, read_config, write_config
-from deeplabcut.core.engine import Engine
+from deeplabcut.core.config import ProjectConfig, get_yaml_loader, read_config, write_config
+from deeplabcut.core.deprecation import DeprecationRound, renamed_parameter
+from deeplabcut.core.engine import Engine, get_available_aug_methods, get_project_engine
 from deeplabcut.core.weight_init import WeightInitialization
 from deeplabcut.utils import (
-    auxfun_models,
     auxfun_multianimal,
     auxiliaryfunctions,
     conversioncode,
@@ -257,13 +255,17 @@ def dropunlabeledframes(config: str | Path):
     print("Done.")
 
 
+@renamed_parameter(old="Labels", new="labels", deprecation_round=DeprecationRound.PARAMETER_ALIASING_302)
+@renamed_parameter(
+    old="visualizeindividuals", new="visualize_individuals", deprecation_round=DeprecationRound.PARAMETER_ALIASING_302
+)
 def check_labels(
     config: str | Path,
-    Labels=None,
+    labels=None,
     scale=1,
     dpi=100,
     draw_skeleton=True,
-    visualizeindividuals=True,
+    visualize_individuals=True,
 ):
     """Check the labeled frames.
 
@@ -277,14 +279,14 @@ def check_labels(
 
     Args:
         config (string): Full path of the config.yaml file as a string.
-        Labels (list, optional): List of at least 3 matplotlib markers. The first one
+        labels (list, optional): List of at least 3 matplotlib markers. The first one
             will be used to indicate the human ground truth location. Defaults to '+'.
         scale (float, optional): Change the relative size of the output images.
             Defaults to 1.
         dpi (int, optional): Output resolution in dpi. Defaults to 100.
         draw_skeleton (bool, optional): Plot skeleton overlaid over body parts.
             Defaults to True.
-        visualizeindividuals (bool, optional): For a multianimal project, if True, the
+        visualize_individuals (bool, optional): For a multianimal project, if True, the
             different individuals have different colors (and all bodyparts the same).
             If False, the colors change over bodyparts rather than individuals.
             Defaults to True.
@@ -297,8 +299,8 @@ def check_labels(
     """
     from deeplabcut.utils import visualization
 
-    if Labels is None:
-        Labels = ["+", ".", "x"]
+    if labels is None:
+        labels = ["+", ".", "x"]
     cfg = read_config(config)
     videos = cfg["video_sets"].keys()
     video_names = [Path(video).stem for video in videos]
@@ -310,7 +312,7 @@ def check_labels(
             DataCombined = pd.read_hdf(folder / ("CollectedData_" + cfg["scorer"] + ".h5"))
             conversioncode.guarantee_multiindex_rows(DataCombined)
             if cfg.get("multianimalproject", False):
-                color_by = "individual" if visualizeindividuals else "bodypart"
+                color_by = "individual" if visualize_individuals else "bodypart"
             else:  # for single animal projects
                 color_by = "bodypart"
 
@@ -320,7 +322,7 @@ def check_labels(
                 folder,
                 scale,
                 dpi=dpi,
-                keypoint=Labels[0],
+                keypoint=labels[0],
                 draw_skeleton=draw_skeleton,
                 color_by=color_by,
             )
@@ -342,7 +344,7 @@ def ParseYaml(configfile: str | Path):
     docs = []
     for raw_doc in raw.split("\n---"):
         try:
-            docs.append(yaml.load(raw_doc, Loader=yaml.SafeLoader))
+            docs.append(get_yaml_loader().load(raw_doc))
         except SyntaxError:
             docs.append(raw_doc)
     return docs
@@ -635,31 +637,31 @@ def mergeandsplit(config: str | Path | ProjectConfig | dict, trainindex=0, unifo
     Examples:
         To create a leave-one-folder-out model:
 
-            trainIndices, testIndices = deeplabcut.mergeandsplit(config, trainindex=0, uniform=False)
+            train_indices, test_indices = deeplabcut.mergeandsplit(config, trainindex=0, uniform=False)
 
         Returns the indices for the first video folder (as defined in config file) as
-        testIndices and all others as trainIndices. You can then create the training set
+        test_indices and all others as train_indices. You can then create the training set
         by calling (e.g. defining it as Shuffle 3):
 
             deeplabcut.create_training_dataset(
                 config,
-                Shuffles=[3],
-                trainIndices=trainIndices,
-                testIndices=testIndices,
+                shuffles=[3],
+                train_indices=train_indices,
+                test_indices=test_indices,
             )
 
         To freeze a (uniform) split (i.e. iid sampled from all the data):
 
-            trainIndices, testIndices = deeplabcut.mergeandsplit(config, trainindex=0, uniform=True)
+            train_indices, test_indices = deeplabcut.mergeandsplit(config, trainindex=0, uniform=True)
 
         You can then create two model instances that have the identical trainingset.
         Thereby you can assess the role of various parameters on the performance of DLC.
 
             deeplabcut.create_training_dataset(
                 config,
-                Shuffles=[0, 1],
-                trainIndices=[trainIndices, trainIndices],
-                testIndices=[testIndices, testIndices],
+                shuffles=[0, 1],
+                train_indices=[train_indices, train_indices],
+                test_indices=[test_indices, test_indices],
             )
     """
     # Loading metadata from config file:
@@ -785,14 +787,17 @@ def format_training_data(df, train_inds, nbodyparts, project_path):
     return train_data, matlab_data
 
 
+@renamed_parameter(old="Shuffles", new="shuffles", deprecation_round=DeprecationRound.PARAMETER_ALIASING_302)
+@renamed_parameter(old="trainIndices", new="train_indices", deprecation_round=DeprecationRound.PARAMETER_ALIASING_302)
+@renamed_parameter(old="testIndices", new="test_indices", deprecation_round=DeprecationRound.PARAMETER_ALIASING_302)
 def create_training_dataset(
     config: str | Path | ProjectConfig | dict,
     num_shuffles=1,
-    Shuffles=None,
+    shuffles=None,
     windows2linux=False,
     userfeedback=True,
-    trainIndices=None,
-    testIndices=None,
+    train_indices=None,
+    test_indices=None,
     net_type=None,
     detector_type=None,
     augmenter_type=None,
@@ -812,16 +817,16 @@ def create_training_dataset(
             file. Alternatively, a ProjectConfig object or a dictionary can be passed.
         num_shuffles (int, optional): Number of shuffles of training dataset to create,
             i.e. ``[1,2,3]`` for ``num_shuffles=3``. Defaults to 1.
-        Shuffles (list[int], optional): Alternatively the user can also give a list of
+        shuffles (list[int], optional): Alternatively the user can also give a list of
             shuffles.
         userfeedback (bool, optional): If ``False``, all requested train/test splits are
             created (no matter if they already exist). If you want to assure that
             previous splits etc. are not overwritten, set this to ``True`` and you will
             be asked for each split. Defaults to True.
-        trainIndices (list of lists, optional): List of one or multiple lists containing
+        train_indices (list of lists, optional): List of one or multiple lists containing
             train indexes. A list containing two lists of training indexes will produce
             two splits. Defaults to None.
-        testIndices (list of lists, optional): List of one or multiple lists containing
+        test_indices (list of lists, optional): List of one or multiple lists containing
             test indexes. Defaults to None.
         net_type (list, optional): Type of networks. The options available depend on which
             engine is used. Currently supported options are:
@@ -920,7 +925,7 @@ def create_training_dataset(
         engine (Engine, optional): Whether to create a pose config for a Tensorflow or
             PyTorch model. Defaults to the value specified in the project configuration
             file. If no engine is specified for the project, defaults to
-            ``deeplabcut.compat.DEFAULT_ENGINE``.
+            ``deeplabcut.core.engine.DEFAULT_ENGINE``.
 
         ctd_conditions (int | str | Path | tuple[int, str] | tuple[int, int] | None,
             optional): If using a conditional-top-down (CTD) net_type, this argument
@@ -956,14 +961,14 @@ def create_training_dataset(
             )
 
             deeplabcut.create_training_dataset(
-                '/analysis/project/reaching-task/config.yaml', Shuffles=[2], engine=deeplabcut.Engine.TF,
+                '/analysis/project/reaching-task/config.yaml', shuffles=[2], engine=deeplabcut.Engine.TF,
             )
 
         Windows:
 
             deeplabcut.create_training_dataset(
                 "C:\\Users\\Ulf\\looming-task\\config.yaml",
-                Shuffles=[3, 17, 5],
+                shuffles=[3, 17, 5],
             )
     """
     import scipy.io as sio
@@ -1005,11 +1010,11 @@ def create_training_dataset(
         create_multianimaltraining_dataset(
             cfg,
             num_shuffles,
-            Shuffles,
+            shuffles,
             net_type=net_type,
             detector_type=detector_type,
-            trainIndices=trainIndices,
-            testIndices=testIndices,
+            train_indices=train_indices,
+            test_indices=test_indices,
             userfeedback=userfeedback,
             engine=engine,
             weight_init=weight_init,
@@ -1019,7 +1024,7 @@ def create_training_dataset(
         scorer = cfg["scorer"]
         project_path = cfg["project_path"]
         if engine is None:
-            engine = compat.get_project_engine(cfg)
+            engine = get_project_engine(cfg)
 
         # Create path for training sets & store data there
         trainingsetfolder = auxiliaryfunctions.get_training_set_folder(
@@ -1057,7 +1062,7 @@ def create_training_dataset(
                 top_down = True
                 net_type = net_type[len("top_down_") :]
 
-        augmenters = compat.get_available_aug_methods(engine)
+        augmenters = get_available_aug_methods(engine)
         default_augmenter = augmenters[0]
         if augmenter_type is None:
             augmenter_type = cfg.get("default_augmenter", default_augmenter)
@@ -1102,15 +1107,18 @@ def create_training_dataset(
             defaultconfigfile = dlcparent_path / "pose_cfg.yaml"
         elif posecfg_template:
             defaultconfigfile = posecfg_template
-
         if engine == Engine.PYTORCH:
             model_path = dlcparent_path
         else:
-            model_path = auxfun_models.check_for_weights(net_type, dlcparent_path)
+            from deeplabcut.tensorflow_compat.dataset_management.create_single_animal import (
+                _tf_get_model_path,
+            )
 
-        Shuffles = validate_shuffles(cfg, Shuffles, num_shuffles, userfeedback)
+            model_path = _tf_get_model_path(net_type, dlcparent_path)
 
-        if trainIndices is None and testIndices is None:
+        shuffles = validate_shuffles(cfg, shuffles, num_shuffles, userfeedback)
+
+        if train_indices is None and test_indices is None:
             splits = [
                 (
                     trainFraction,
@@ -1118,13 +1126,13 @@ def create_training_dataset(
                     SplitTrials(range(len(Data.index)), trainFraction),
                 )
                 for trainFraction in cfg["TrainingFraction"]
-                for shuffle in Shuffles
+                for shuffle in shuffles
             ]
         else:
-            if len(trainIndices) != len(testIndices) != len(Shuffles):
-                raise ValueError("Number of Shuffles and train and test indexes should be equal.")
+            if len(train_indices) != len(test_indices) != len(shuffles):
+                raise ValueError("Number of shuffles and train and test indexes should be equal.")
             splits = []
-            for shuffle, (train_inds, test_inds) in enumerate(zip(trainIndices, testIndices, strict=False)):
+            for shuffle, (train_inds, test_inds) in enumerate(zip(train_indices, test_indices, strict=False)):
                 trainFraction = round(len(train_inds) * 1.0 / (len(train_inds) + len(test_inds)), 2)
                 print(f"You passed a split with the following fraction: {int(100 * trainFraction)}%")
                 # Now that the training fraction is guaranteed to be correct,
@@ -1133,18 +1141,25 @@ def create_training_dataset(
                 train_inds = train_inds[train_inds != -1]
                 test_inds = np.asarray(test_inds)
                 test_inds = test_inds[test_inds != -1]
-                splits.append((trainFraction, Shuffles[shuffle], (train_inds, test_inds)))
+                splits.append((trainFraction, shuffles[shuffle], (train_inds, test_inds)))
 
         bodyparts = auxiliaryfunctions.get_bodyparts(cfg)
         nbodyparts = len(bodyparts)
-        for trainFraction, shuffle, (trainIndices, testIndices) in splits:
-            if len(trainIndices) > 0:
+        for trainFraction, shuffle, (train_inds, test_inds) in splits:
+            if len(train_inds) > 0:
                 if userfeedback:
-                    trainposeconfigfile, _, _ = compat.return_train_network_path(
+                    if engine == Engine.TF:
+                        from deeplabcut.pose_estimation_tensorflow.training import (
+                            return_train_network_path,
+                        )
+                    else:
+                        from deeplabcut.pose_estimation_pytorch.apis.utils import (
+                            return_train_network_path,
+                        )
+                    trainposeconfigfile, _, _ = return_train_network_path(
                         cfg_path,
                         shuffle=shuffle,
                         trainingsetindex=cfg["TrainingFraction"].index(trainFraction),
-                        engine=engine,
                     )
                     if trainposeconfigfile.is_file():
                         askuser = input(
@@ -1154,7 +1169,7 @@ def create_training_dataset(
                         )
                         if askuser == "no" or askuser == "No" or askuser == "N" or askuser == "No":
                             raise Exception(
-                                "Use the Shuffles argument as a list to specify a different shuffle index. "
+                                "Use the shuffles argument as a list to specify a different shuffle index. "
                                 "Check out the help for more details."
                             )
 
@@ -1170,7 +1185,7 @@ def create_training_dataset(
                 ################################################################################
                 # Saving data file (convert to training file for deeper cut (*.mat))
                 ################################################################################
-                data, MatlabData = format_training_data(Data, trainIndices, nbodyparts, project_path)
+                data, MatlabData = format_training_data(Data, train_inds, nbodyparts, project_path)
                 sio.savemat(str(Path(project_path) / datafilename), {"dataset": MatlabData})
 
                 ################################################################################
@@ -1179,8 +1194,8 @@ def create_training_dataset(
                 auxiliaryfunctions.save_metadata(
                     Path(project_path) / metadatafilename,
                     data,
-                    trainIndices,
-                    testIndices,
+                    train_inds,
+                    test_inds,
                     trainFraction,
                 )
                 metadata.update_metadata(
@@ -1188,8 +1203,8 @@ def create_training_dataset(
                     train_fraction=trainFraction,
                     shuffle=shuffle,
                     engine=engine,
-                    train_indices=trainIndices,
-                    test_indices=testIndices,
+                    train_indices=train_inds,
+                    test_indices=test_inds,
                     overwrite=not userfeedback,
                 )
 
@@ -1209,62 +1224,24 @@ def create_training_dataset(
 
                 path_train_config = str(Path(cfg["project_path"]) / modelfoldername / "train" / engine.pose_cfg_name)
                 path_test_config = str(Path(cfg["project_path"]) / modelfoldername / "test" / "pose_cfg.yaml")
+
                 if engine == Engine.TF:
-                    if weight_init is not None:
-                        raise ValueError(
-                            "Weight initialization is not supported for TensorFlow engine. "
-                            "Pretrained weights are automatically downloaded."
-                        )
-                    items2change = {
-                        "dataset": datafilename,
-                        "engine": engine.aliases[0],
-                        "metadataset": metadatafilename,
-                        "num_joints": len(bodyparts),
-                        "all_joints": [[i] for i in range(len(bodyparts))],
-                        "all_joints_names": [str(bpt) for bpt in bodyparts],
-                        "init_weights": model_path,
-                        "project_path": str(cfg["project_path"]),
-                        "net_type": net_type,
-                        "dataset_type": augmenter_type,
-                    }
-
-                    items2drop = {}
-                    if augmenter_type == "scalecrop":
-                        # these values are dropped as scalecrop
-                        # doesn't have rotation implemented
-                        items2drop = {"rotation": 0, "rotratio": 0.0}
-                    # Also drop maDLC smart cropping augmentation parameters
-                    for key in [
-                        "pre_resize",
-                        "crop_size",
-                        "max_shift",
-                        "crop_sampling",
-                    ]:
-                        items2drop[key] = None
-
-                    trainingdata = MakeTrain_pose_yaml(
-                        items2change,
-                        path_train_config,
-                        defaultconfigfile,
-                        items2drop,
-                        save=(engine == Engine.TF),
+                    from deeplabcut.tensorflow_compat.dataset_management.create_single_animal import (
+                        _tf_create_pose_config_files,
                     )
 
-                    keys2save = [
-                        "dataset",
-                        "num_joints",
-                        "all_joints",
-                        "all_joints_names",
-                        "net_type",
-                        "init_weights",
-                        "global_scale",
-                        "location_refinement",
-                        "locref_stdev",
-                    ]
-                    MakeTest_pose_yaml(trainingdata, keys2save, path_test_config)
-                    print(
-                        "The training dataset is successfully created. Use the function"
-                        "'train_network' to start training. Happy training!"
+                    _tf_create_pose_config_files(
+                        datafilename=datafilename,
+                        metadatafilename=metadatafilename,
+                        bodyparts=bodyparts,
+                        model_path=model_path,
+                        project_path=str(cfg["project_path"]),
+                        net_type=net_type,
+                        augmenter_type=augmenter_type,
+                        path_train_config=path_train_config,
+                        defaultconfigfile=defaultconfigfile,
+                        path_test_config=path_test_config,
+                        weight_init=weight_init,
                     )
                 elif engine == Engine.PYTORCH:
                     from deeplabcut.pose_estimation_pytorch.config.make_pose_config import (
@@ -1555,10 +1532,10 @@ def create_training_model_comparison(
                 )
                 create_training_dataset(
                     cfg,
-                    Shuffles=[get_max_shuffle_idx],
+                    shuffles=[get_max_shuffle_idx],
                     net_type=net,
-                    trainIndices=[trainIndices],
-                    testIndices=[testIndices],
+                    train_indices=[trainIndices],
+                    test_indices=[testIndices],
                     augmenter_type=aug,
                     userfeedback=userfeedback,
                 )
@@ -1660,7 +1637,7 @@ def create_training_dataset_from_existing_split(
         engine: Whether to create a pose config for a Tensorflow or PyTorch model.
             Defaults to the value specified in the project configuration file. If no
             engine is specified for the project, defaults to
-            ``deeplabcut.compat.DEFAULT_ENGINE``.
+            ``deeplabcut.core.engine.DEFAULT_ENGINE``.
 
         ctd_conditions: int | str | Path | tuple[int, str] | tuple[int, int] | None, default = None,
             If using a conditional-top-down (CTD) net_type, this argument should be
@@ -1717,10 +1694,10 @@ def create_training_dataset_from_existing_split(
     return create_training_dataset(
         config=cfg,
         num_shuffles=num_shuffles,
-        Shuffles=shuffles,
+        shuffles=shuffles,
         userfeedback=userfeedback,
-        trainIndices=[train_idx for _ in range(num_copies)],
-        testIndices=[test_idx for _ in range(num_copies)],
+        train_indices=[train_idx for _ in range(num_copies)],
+        test_indices=[test_idx for _ in range(num_copies)],
         net_type=net_type,
         detector_type=detector_type,
         augmenter_type=augmenter_type,

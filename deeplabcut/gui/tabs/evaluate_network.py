@@ -31,7 +31,7 @@ from deeplabcut.gui.components import (
     _create_vertical_layout,
 )
 from deeplabcut.gui.displays.selected_shuffle_display import SelectedShuffleDisplay
-from deeplabcut.gui.widgets import ConfigEditor, launch_napari
+from deeplabcut.gui.widgets import launch_napari
 from deeplabcut.utils import auxiliaryfunctions
 
 
@@ -120,8 +120,7 @@ class EvaluateNetwork(DefaultTab):
         layout.addWidget(self.shuffle_display)
 
     def open_inferencecfg_editor(self):
-        editor = ConfigEditor(self.root.inference_cfg_path)
-        editor.show()
+        self._open_config_editor(self.root.inference_cfg_path)
 
     def plot_maps(self):
         shuffle = self.root.shuffle_value
@@ -194,10 +193,10 @@ class EvaluateNetwork(DefaultTab):
 
             deeplabcut.evaluate_network(
                 config_path,
-                Shuffles=[shuffle],
+                shuffles=[shuffle],
                 plotting=plotting,
                 show_errors=True,
-                comparisonbodyparts=bodyparts_to_use,
+                comparison_bodyparts=bodyparts_to_use,
             )
 
             if plotting:

@@ -37,10 +37,12 @@ dependencies = [
   "h5py>=3.15.1; platform_system=='Darwin'",
   "huggingface-hub>=0.23",
   "imageio-ffmpeg",
+  "imgaug>=0.4",
+  "lazy-loader>=0.4",
   "matplotlib>=3.3,<3.9,!=3.7,!=3.7.1",
   "networkx>=2.6",
   "numba>=0.54",
-  "numpy>=1.18.5,<2",
+  "numpy>=1.22.4,<2",
   "packaging>=26",
   # Migration to pandas 3.0 is tracked in https://github.com/DeepLabCut/DeepLabCut/issues/3362.
   "pandas[hdf5,performance]>=2.2,<3",
@@ -58,6 +60,7 @@ dependencies = [
   "torch>=2",
   "torchvision",
   "tqdm",
+  "typer>=0.12",
 ]
 [[project.authors]]
 name = "M-Lab of Adaptive Intelligence"
@@ -78,16 +81,6 @@ openvino = [ "openvino-dev==2022.1" ]
 docs = [
   "jupyter-book==1.0.4.post1",
   "sphinxcontrib-mermaid",
-]
-dev-docs = [
-  "black>=24",
-  "mike>=2.1",
-  "mkdocs>=1.6",
-  "mkdocs-api-autonav>=0.1",
-  "mkdocs-autorefs>=1.2",
-  "mkdocs-jupyter>=0.25",
-  "mkdocs-material[imaging]>=9.5",
-  "mkdocstrings[python]>=0.27",
 ]
 fmpose3d = [ "fmpose3d>=0.0.8" ]
 # Use only one of [tf, tf-cu11, tf-cu12, tf-latest]. Do not combine extras.
@@ -158,6 +151,7 @@ Repository = "https://github.com/DeepLabCut/DeepLabCut"
 Documentation = "https://deeplabcut.github.io/DeepLabCut/README.html"
 
 [dependency-groups]
+# Groups, not extras:  Install with `pip install --group <name>`
 dev = [
   "coverage",
   "nbformat>5",
@@ -166,14 +160,30 @@ dev = [
   "pytest-cov",
   "ruff",
 ]
+dev-docs = [
+  "black>=24",
+  "mike>=2.1",
+  "mkdocs>=1.6",
+  "mkdocs-api-autonav>=0.1",
+  "mkdocs-autorefs>=1.2",
+  "mkdocs-jupyter>=0.25",
+  "mkdocs-material[imaging]>=9.5",
+  "mkdocstrings[python]>=0.27",
+]
 gui-dev = [
   "pytest-qt",
+]
+knowledge-index = [
+  "docutils",
+  "griffelib",
+  "markdown-it-py",
+  "pyyaml",
 ]
 
 [tool.setuptools]
 include-package-data = false
 [tool.setuptools.package-data]
-"*" = [ "*.yaml", "*.yml", "*.json", "*.qss", "*.png", "*.md", "*.sh" ]
+"*" = [ "*.yaml", "*.yml", "*.json", "*.qss", "*.png", "*.md", "*.sh", "*.pyi", "py.typed" ]
 [tool.setuptools.packages.find]
 include = [ "deeplabcut*" ]
 exclude = [ "tests*", "docs*", "examples*" ]
@@ -219,6 +229,7 @@ ignore = [ "E741", "B007" ]
 "deeplabcut/pose_estimation_tensorflow/lib/inferenceutils.py" = [ "F403" ]
 "deeplabcut/pose_estimation_tensorflow/lib/trackingutils.py" = [ "F403" ]
 "*.ipynb" = [ "E402" ]
+"tests/typing/top_level_api.py" = [ "F821" ]
 [tool.ruff.lint.pydocstyle]
 convention = "google"
 
@@ -242,6 +253,7 @@ markers = [
   "fmpose3d: tests for fmpose3d integration",
   "unittest: fast unit-level tests",
   "functional: functional/integration-style tests",
+  "tf_routing_integration: test public API integration with the TF-engine router (not end-to-end integration)",
   "deprecated: tests for deprecated APIs kept for backward-compatibility",
 ]
 

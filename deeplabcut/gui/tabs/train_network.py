@@ -15,7 +15,7 @@ from dataclasses import dataclass
 from PySide6 import QtWidgets
 from PySide6.QtCore import Qt, Slot
 
-import deeplabcut.compat as compat
+from deeplabcut.api.pose_estimation import train_network
 from deeplabcut.core.engine import Engine
 from deeplabcut.gui.components import (
     DefaultTab,
@@ -26,7 +26,6 @@ from deeplabcut.gui.components import (
 )
 from deeplabcut.gui.displays.selected_shuffle_display import SelectedShuffleDisplay
 from deeplabcut.gui.gui_assets import icon_from_resource
-from deeplabcut.gui.widgets import ConfigEditor
 
 
 @dataclass
@@ -136,7 +135,7 @@ class TrainNetwork(DefaultTab):
     def show_help_dialog(self):
         dialog = QtWidgets.QDialog(self)
         layout = QtWidgets.QVBoxLayout()
-        label = QtWidgets.QLabel(compat.train_network.__doc__, self)
+        label = QtWidgets.QLabel(train_network.__doc__, self)
         scroll = QtWidgets.QScrollArea()
         scroll.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
         scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
@@ -219,8 +218,7 @@ class TrainNetwork(DefaultTab):
         self.root.logger.info(f"{attribute.label} set to {value}")
 
     def open_posecfg_editor(self):
-        editor = ConfigEditor(self.root.pose_cfg_path)
-        editor.show()
+        self._open_config_editor(self.root.pose_cfg_path)
 
     def train_network(self):
         try:
@@ -238,7 +236,7 @@ class TrainNetwork(DefaultTab):
                 if detector_to_start_training_from is not None:
                     kwargs["detector_path"] = detector_to_start_training_from
 
-            compat.train_network(config_path, shuffle, **kwargs)
+            train_network(config_path, shuffle, **kwargs)
 
             msg = QtWidgets.QMessageBox()
             msg.setIcon(QtWidgets.QMessageBox.Information)

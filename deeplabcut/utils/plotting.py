@@ -34,7 +34,8 @@ import numpy as np
 import pandas as pd
 
 from deeplabcut.core import crossvalutils
-from deeplabcut.core.deprecation import renamed_parameter
+from deeplabcut.core.config import ProjectConfig
+from deeplabcut.core.deprecation import DeprecationRound, renamed_parameter
 from deeplabcut.utils import auxfun_multianimal, auxiliaryfunctions, visualization
 from deeplabcut.utils.auxfun_videos import collect_video_paths
 
@@ -169,9 +170,9 @@ def PlottingResults(
 ##################################################
 
 
-@renamed_parameter(old="videotype", new="video_extensions", since="3.0.0")
+@renamed_parameter(old="videotype", new="video_extensions", deprecation_round=DeprecationRound.INIT_PARAMETER_ALIASING)
 def plot_trajectories(
-    config: str | Path,
+    config: ProjectConfig | dict | Path | str,
     videos: list[str | Path],
     video_extensions: str | Sequence[str] | None = None,
     shuffle=1,
@@ -192,7 +193,7 @@ def plot_trajectories(
     """Plots the trajectories of various bodyparts across the video.
 
     Args:
-        config (str | Path): Full path of the config.yaml file.
+        config (ProjectConfig | dict | Path | str): Full path of the config.yaml file.
         videos (list[str | Path]): Full paths to videos for analysis or a path to the directory, where all the
             videos with same extension are stored.
         video_extensions (str | Sequence[str] | None, optional): Controls how ``videos`` are
@@ -317,7 +318,7 @@ def plot_trajectories(
 
     if len(failures) > 0:
         # Some videos were not evaluated.
-        failed_videos = ",".join(failures)
+        failed_videos = ",".join(str(video) for video in failures)
         if len(multianimal_errors) > 0:
             verbose_error = ": " + " ".join(multianimal_errors)
         else:
@@ -464,7 +465,7 @@ def plot_edge_affinity_distributions(
         i1, i2 = graph[ind]
         w_tr = w_train[ind]
         b_tr = b_train[ind]
-        sep, _ = crossvalutils._calc_separability(b_tr, w_tr, metric="auc")
+        sep, _ = crossvalutils.calc_separability(b_tr, w_tr, metric="auc")
         axes[n].text(
             0.5,
             0.8,
