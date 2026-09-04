@@ -37,6 +37,7 @@ from deeplabcut.core import crossvalutils
 from deeplabcut.core.deprecation import renamed_parameter
 from deeplabcut.utils import auxfun_multianimal, auxiliaryfunctions, visualization
 from deeplabcut.utils.auxfun_videos import collect_video_paths
+from deeplabcut.utils.matplotlib_compat import get_colormap
 
 
 def Histogram(vector, color, bins, ax=None, linewidth=1.0):
@@ -139,7 +140,7 @@ def PlottingResults(
                 Histogram(temp_y, colors(bpindex), bins, ax4, linewidth=linewidth)
 
     sm = plt.cm.ScalarMappable(
-        cmap=plt.get_cmap(cfg["colormap"]),
+        cmap=get_colormap(cfg["colormap"]),
         norm=plt.Normalize(vmin=0, vmax=len(bodyparts2plot) - 1),
     )
     sm._A = []
@@ -464,7 +465,7 @@ def plot_edge_affinity_distributions(
         i1, i2 = graph[ind]
         w_tr = w_train[ind]
         b_tr = b_train[ind]
-        sep, _ = crossvalutils._calc_separability(b_tr, w_tr, metric="auc")
+        sep, _ = crossvalutils.calc_separability(b_tr, w_tr, metric="auc")
         axes[n].text(
             0.5,
             0.8,

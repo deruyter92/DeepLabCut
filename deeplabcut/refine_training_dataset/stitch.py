@@ -22,7 +22,6 @@ import matplotlib.pyplot as plt
 import networkx as nx
 import numpy as np
 import pandas as pd
-import scipy.linalg.interpolative as sli
 from networkx.algorithms.flow import preflow_push
 from scipy.linalg import hankel
 from scipy.spatial.distance import directed_hausdorff
@@ -37,6 +36,7 @@ from deeplabcut.core.trackingutils import (
 )
 from deeplabcut.utils import auxfun_multianimal, auxiliaryfunctions
 from deeplabcut.utils.auxfun_videos import VideoWriter, collect_video_paths
+from deeplabcut.utils.matplotlib_compat import get_colormap
 
 
 class Tracklet:
@@ -384,11 +384,11 @@ class Tracklet:
         4/sqrt(3)
         """
         mat = self.to_hankelet()
-        if np.any(mat):  # check that the matrix contains non-zero entries
+        if np.any(mat):
             # nrows, ncols = mat.shape
             # beta = nrows / ncols
             # omega = 0.56 * beta ** 3 - 0.95 * beta ** 2 + 1.82 * beta + 1.43
-            _, s, _ = sli.svd(mat, min(10, min(mat.shape)))
+            s = np.linalg.svd(mat, compute_uv=False)[:10]
         else:
             s = np.zeros(min(10, min(mat.shape)))
 
@@ -916,7 +916,7 @@ class TrackletStitcher:
                 spine.set_visible(False)
         for path in self.paths:
             length = len(path)
-            colors = plt.get_cmap(colormap, length)(range(length))
+            colors = get_colormap(colormap, length)(range(length))
             for tracklet, color in zip(path, colors, strict=False):
                 tracklet.plot(color=color, ax=ax)
 
@@ -929,7 +929,7 @@ class TrackletStitcher:
         for loc, spine in ax.spines.items():
             if loc != "bottom":
                 spine.set_visible(False)
-        colors = plt.get_cmap(colormap, self.n_tracks)(range(self.n_tracks))
+        colors = get_colormap(colormap, self.n_tracks)(range(self.n_tracks))
         for track, color in zip(self.tracks, colors, strict=False):
             track.plot(color=color, ax=ax)
 
@@ -941,7 +941,7 @@ class TrackletStitcher:
                 spine.set_visible(False)
         axes[1].axis("off")
 
-        cmap = plt.get_cmap(colormap)
+        cmap = get_colormap(colormap)
         colors = cycle(cmap.colors)
         line2tracklet = dict()
         tracklet2lines = dict()
