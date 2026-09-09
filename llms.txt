@@ -4,7 +4,8 @@
 
 ## Docs
 - [User documentation](https://deeplabcut.github.io/DeepLabCut/): full user guide and workflows
-- [API reference](https://deeplabcut.github.io/DeepLabCut/dev/main/reference/): every public module, class and function
+- [API reference (stable release)](https://deeplabcut.github.io/DeepLabCut/dev/latest-release/reference/deeplabcut/): every public module, class and function
+- [API reference (main / unreleased)](https://deeplabcut.github.io/DeepLabCut/dev/main/reference/deeplabcut/): the rolling developer build
 
 ## Machine-readable index
 - [Index manifest](https://deeplabcut.github.io/DeepLabCut/knowledge/manifest.json): start here -- every indexed api version and which one is current

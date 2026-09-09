@@ -9,8 +9,8 @@
   },
   "docs": {
     "package_version": "3.0.1",
-    "revision": "1a5b1e20136965a88d542d89802d278b514b7173",
-    "generated_at": "2026-08-27T14:05:32+00:00"
+    "revision": "569b7fa2cfbf2390f4c0c44d4dec8d4291d00e14",
+    "generated_at": "2026-09-09T08:38:57+00:00"
   },
   "extractor_version": "0.0.1",
   "generated_by": "tools/knowledge_indexing"
