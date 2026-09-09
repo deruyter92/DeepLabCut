@@ -26,6 +26,7 @@ from skimage import color, io
 from tqdm import trange
 
 from deeplabcut.utils import auxfun_videos, auxiliaryfunctions
+from deeplabcut.utils.matplotlib_compat import get_colormap, remove_artists
 
 PlotMode = Literal["bodypart", "individual"]
 BoundingBoxColor = Colormap | str | None
@@ -44,7 +45,7 @@ def get_cmap(n: int, name: str = "hsv") -> Colormap:
          A function that maps each index in 0, 1, ..., n-1 to a distinct
          RGB color; the keyword argument name must be a standard mpl colormap name.
     """
-    return plt.cm.get_cmap(name, n)
+    return get_colormap(name, n)
 
 
 def make_labeled_image(
@@ -284,8 +285,7 @@ def create_minimal_figure(dpi=100):
 
 
 def erase_artists(ax):
-    for artist in ax.lines + ax.collections + ax.artists + ax.patches + ax.images:
-        artist.remove()
+    remove_artists(ax)
     ax.figure.canvas.draw_idle()
 
 
