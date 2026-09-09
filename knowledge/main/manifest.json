@@ -1,10 +1,11 @@
 {
   "schema_version": 1,
   "api_version_label": "main",
+  "api_aliases": [],
   "api": {
     "package_version": "3.0.1",
-    "revision": "1a5b1e20136965a88d542d89802d278b514b7173",
-    "generated_at": "2026-08-27T14:04:56+00:00"
+    "revision": "569b7fa2cfbf2390f4c0c44d4dec8d4291d00e14",
+    "generated_at": "2026-09-09T08:38:30+00:00"
   },
   "docs": {
     "package_version": "3.0.1",
